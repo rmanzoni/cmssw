@@ -393,7 +393,7 @@ void RochCor::momcor_mc( TLorentzVector& mu, float charge, float sysdev, int run
   
   if(runopt==0){
     recm = recmA;
-    drecm = drecmA;
+    //drecm = drecmA;
     
     delta = deltaA;
     sf = sfA;
@@ -403,7 +403,7 @@ void RochCor::momcor_mc( TLorentzVector& mu, float charge, float sysdev, int run
     sfer = TMath::Sqrt( TMath::Power(sfA_stat,2) + TMath::Power(sfA_syst,2) );
   }else if(runopt==1){
     recm = recmB;
-    drecm = drecmB;
+    //drecm = drecmB;
     
     delta = deltaB;
     sf = sfB;
