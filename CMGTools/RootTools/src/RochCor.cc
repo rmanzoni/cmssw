@@ -383,7 +383,7 @@ void RochCor::momcor_mc( TLorentzVector& mu, float charge, float sysdev, int run
   e  *= cor;
   
   float recm = 0.0;
-  float drecm = 0.0; 
+  //float drecm = 0.0; 
   float delta = 0.0;
   float sf = 0.0;
 
