@@ -118,9 +118,7 @@ namespace cmg {
     virtual double et() const {return p4_.Et(); }
     /// mass                                                                              
     virtual float mass() const { return p4_.M(); }
-    // virtual double mass() const { return p4_.M(); }
     /// mass squared                                                                      
-    // virtual double massSqr() const { return p4_.M()*p4_.M(); }
     virtual float massSqr() const { return p4_.M()*p4_.M(); }
 
     /// transverse mass                                                                   
