@@ -31,8 +31,10 @@ patJets.addAssociatedTracks = False
 from RecoJets.JetAssociationProducers.ak5JTA_cff import *
 ak5JetTracksAssociatorAtVertex.jets = jetSource
 from RecoBTag.Configuration.RecoBTag_cff import * # btagging sequence
-softPFMuonsTagInfos.jets = jetSource
-softPFElectronsTagInfos.jets = jetSource
+softMuonTagInfos.jets = jetSource
+softElectronTagInfos.jets = jetSource
+#softPFMuonsTagInfos.jets = jetSource
+#softPFElectronsTagInfos.jets = jetSource
 
 ##CGIT: some taggers are missing in the btagging sequence.
 ## so leaving only one tagger in for now.

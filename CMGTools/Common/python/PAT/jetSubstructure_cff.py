@@ -50,7 +50,7 @@ if isNewerThan('CMSSW_5_2_0'):
     patJetsCHSpruned = patJets.clone()
     patJetsCHSpruned.jetSource = jetSource
     patJetsCHSpruned.addJetCharge = False
-    patJetsCHSpruned.embedCaloTowers = False
+    #patJetsCHSpruned.embedCaloTowers = False
     patJetsCHSpruned.embedPFCandidates = False
     patJetsCHSpruned.addAssociatedTracks = False
     patJetsCHSpruned.addBTagInfo = False
@@ -129,7 +129,7 @@ if isNewerThan('CMSSW_5_2_0'):
     patJetsAK7CHSpruned = patJets.clone()
     patJetsAK7CHSpruned.jetSource = jetSource
     patJetsAK7CHSpruned.addJetCharge = False
-    patJetsAK7CHSpruned.embedCaloTowers = False
+    #patJetsAK7CHSpruned.embedCaloTowers = False
     patJetsAK7CHSpruned.embedPFCandidates = False
     patJetsAK7CHSpruned.addAssociatedTracks = False
     patJetsAK7CHSpruned.addBTagInfo = False
