@@ -120,13 +120,13 @@ else:
 if isNewerThan('CMSSW_5_3_0'):
     #the tracking PoG filters only work in 53
     from RecoMET.METFilters.trackingPOGFilters_cfi import *
-    trkPOGFiltersSequence = cms.Sequence(~manystripclus53X * ~toomanystripclus53X * ~logErrorTooManyClusters)
-    trkPOGFiltersPath = cms.Path(trkPOGFiltersSequence)
+    #trkPOGFiltersSequence = cms.Sequence(~manystripclus53X * ~toomanystripclus53X * ~logErrorTooManyClusters)
+    #trkPOGFiltersPath = cms.Path(trkPOGFiltersSequence)
     #further cleaning of hcal laser events filtering based on txt file, since digi info not available in AOD (twiki confusing...)
     from EventFilter.HcalRawToDigi.hcallasereventfilter2012_cfi import hcallasereventfilter2012 # for prompt reco
     metNoiseCleaning += hcallasereventfilter2012
-    from EventFilter.HcalRawToDigi.hcallaserFilterFromTriggerResult_cff import hcalfilter # for re-reco and parked
-    metNoiseCleaning += hcalfilter
+    #from EventFilter.HcalRawToDigi.hcallaserFilterFromTriggerResult_cff import hcalfilter # for re-reco and parked
+    #metNoiseCleaning += hcalfilter
     
 else:
     print >> sys.stderr, 'trkPOGFilters only available in releases >= 5.3'
