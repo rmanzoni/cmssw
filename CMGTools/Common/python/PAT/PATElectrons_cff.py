@@ -14,7 +14,9 @@ import FWCore.ParameterSet.Config as cms
 
 # prepare reco information
 # from PhysicsTools.PatAlgos.recoLayer0.electronId_cff import *
-from PhysicsTools.PatAlgos.recoLayer0.electronIsolation_cff import *
+## RM: removed from PAT
+#from PhysicsTools.PatAlgos.recoLayer0.electronIsolation_cff import *
+from CMGTools.Common.PAT.patElectronIsolation_cff import *
 
 
 # add PAT specifics

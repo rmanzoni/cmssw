@@ -4,6 +4,11 @@ from PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff import *
 patTrigger.processName = cms.string('*')
 from CMGTools.Common.trigger_cff import *
 
+patTriggerDefaultSequence = cms.Sequence(	 
+   patTrigger	 
+ * patTriggerEvent	 
+ )	 
+
 PATTriggerSequence = cms.Sequence(
     # l1GtRecord + 
     patTriggerDefaultSequence
