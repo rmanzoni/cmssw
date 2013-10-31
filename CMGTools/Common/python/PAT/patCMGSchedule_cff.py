@@ -6,7 +6,7 @@ def getSchedule(process, runOnMC, runOnFastSim):
 
     result = cms.Schedule(
         process.p,
-        process.EcalDeadCellTriggerPrimitiveFilterPath,
+        #process.EcalDeadCellTriggerPrimitiveFilterPath,
         process.hcalLaserEventFilterPath,
         process.trackingFailureFilterPath,
         process.primaryVertexFilterPath,
