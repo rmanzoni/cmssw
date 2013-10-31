@@ -46,8 +46,10 @@ from CommonTools.ParticleFlow.pfParticleSelection_cff import *
 # note pfPileUp modified according to JetMET's recommendations
 pfPileUp.checkClosestZVertex = False
 pfPileUp.Vertices = 'goodOfflinePrimaryVertices'
-pfPileUp.PFCandidates = 'particleFlow'
-pfNoPileUp.bottomCollection = 'particleFlow'
+#pfPileUp.PFCandidates = 'particleFlow'
+#pfNoPileUp.bottomCollection = 'particleFlow'
+pfPileUp.PFCandidates = 'particleFlowPtrs'
+pfNoPileUp.bottomCollection = 'particleFlowPtrs'
 
 from CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi import goodOfflinePrimaryVertices
 pfNoPileUpSequence.insert(0, goodOfflinePrimaryVertices)
