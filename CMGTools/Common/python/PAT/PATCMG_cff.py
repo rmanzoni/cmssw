@@ -26,6 +26,8 @@ PATCMGGenSequence = cms.Sequence(
 
 from CMGTools.Common.PAT.PATTrigger_cff import * 
 
+# patTrigger.processName = cms.string('RECO') ## not really meaningful
+
 PATCMGTriggerSequence = cms.Sequence(
     PATTriggerSequence +
     triggerSequence
@@ -73,7 +75,8 @@ PATCMGRhoSequence = rhoSequence
 
 from CMGTools.Common.PAT.PATMuons_cff import *
 
-cmgMuon.cfg.inputCollection = 'patMuonsWithTrigger'
+# cmgMuon.cfg.inputCollection = 'patMuonsWithTrigger' ## no HLT in POST LS1 samples
+cmgMuon.cfg.inputCollection = 'patMuonsWithDirectionalIsolation'
 
 PATCMGMuonSequence = cms.Sequence(
     PATMuonSequence + 
@@ -85,7 +88,8 @@ PATCMGMuonSequence = cms.Sequence(
 
 from CMGTools.Common.PAT.PATElectrons_cff import *
 
-cmgElectron.cfg.inputCollection = 'patElectronsWithTrigger'
+# cmgElectron.cfg.inputCollection = 'patElectronsWithTrigger' ## no HLT in POST LS1 samples
+cmgElectron.cfg.inputCollection = 'patElectronsWithRegressionVars'
 
 PATCMGElectronSequence = cms.Sequence(
     PATElectronSequence + 
@@ -99,6 +103,7 @@ PATCMGElectronSequence = cms.Sequence(
 from CMGTools.Common.PAT.PATPhotons_cff import *
 
 cmgPhoton.cfg.inputCollection = 'pfSelectedPhotons'
+cmgPhoton.cfg.muonCollection = 'patMuonsWithDirectionalIsolation' ## by pass any trigger-related stuff
 
 PATCMGPhotonSequence = cms.Sequence(
     PATPhotonSequence 

@@ -127,8 +127,8 @@ PATElectronSequence = cms.Sequence(
     pfNoPileUpBackFromPointer +
     patElectronsWithDirectionalIsolation +
     patElectronsWithRegressionVars +
-    patElectronsWithTriggerSequence +
-    patConversions 
+    patElectronsWithTriggerSequence #+
+    #patConversions 
     )
 
 # Skip this since calibration can now be applied on the cmgTuples

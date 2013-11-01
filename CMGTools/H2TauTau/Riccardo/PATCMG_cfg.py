@@ -143,19 +143,24 @@ process.p += process.postPathCounter
 # process.PATCMGSequence.remove(process.PATCMGPileUpSubtractionSequence)
 # process.PATCMGSequence.remove(process.PATCMGRhoSequence)
 # process.PATCMGSequence.remove(process.PATCMGMuonSequence)
-# process.PATCMGSequence.remove(process.PATCMGElectronSequence)
+process.PATCMGSequence.remove(process.PATCMGElectronSequence)
 # process.PATCMGSequence.remove(process.PATCMGGenSequence)
 # process.PATCMGSequence.remove(process.PATCMGJetSequence)
 # process.PATCMGSequence.remove(process.PATCMGTauSequence)
 # process.PATCMGSequence.remove(process.PATCMGMetSequence)
 # process.p.remove(process.PATCMGJetCHSSequence)
-# process.p.remove(process.PATCMGTriggerSequence)
+process.p.remove(process.PATCMGTriggerSequence)
 # process.p.remove(process.PATCMGPhotonSequence)
 # process.p.remove(process.PATCMGVertexSequence)
 # process.p.remove(process.PATCMGPhotonSequence)
 # process.p.remove(process.MetSignificanceSequence)
 # process.p.remove(process.PATCMGMetRegressionSequence)
 # process.p.remove(process.PATCMGJetSequenceCHSpruned)
+
+# import pdb ; pdb.set_trace()
+# process.PATCMGSequence.remove(process.patMuonsWithTriggerSequence)
+# process.PATCMGSequence.remove(process.patElectronsWithTriggerSequence)
+
 
 if runOnFastSim :
     process.vertexWeightSequence.remove(process.vertexWeight3DMay10ReReco)

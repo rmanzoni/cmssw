@@ -65,6 +65,6 @@ PATMuonSequence = cms.Sequence(
     patMuonsWithPF +
     patMuonsWithMVA +
     pfNoPileUpBackFromPointer +
-    patMuonsWithDirectionalIsolation +
-    patMuonsWithTriggerSequence 
+    patMuonsWithDirectionalIsolation #+
+    #patMuonsWithTriggerSequence 
     )

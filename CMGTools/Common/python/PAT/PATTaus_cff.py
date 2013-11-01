@@ -51,7 +51,7 @@ tauIDs = dict(
     againstElectronTight = cms.InputTag('hpsPFTauDiscriminationByTightElectronRejection'),
     # 
     againstElectronMVA = cms.InputTag('hpsPFTauDiscriminationByMVAElectronRejection'),
-    againstElectronDeadECAL = cms.InputTag('hpsPFTauDiscriminationByDeadECALElectronRejection'),
+    #againstElectronDeadECAL = cms.InputTag('hpsPFTauDiscriminationByDeadECALElectronRejection'),
     ##
     againstElectronMVA2raw = cms.InputTag('hpsPFTauDiscriminationByMVA2rawElectronRejection'),
     againstElectronMVA2category = cms.InputTag('hpsPFTauDiscriminationByMVA2rawElectronRejection:category'),
