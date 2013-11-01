@@ -37,6 +37,7 @@ PATCMGTriggerSequence = cms.Sequence(
 from CMGTools.Common.PFVertexProducer_cfi import particleFlow
 PATCMGVertexSequence = cms.Sequence ( particleFlow )
 
+#particleFlowPtrs.src = cms.InputTag("particleFlow","","RECO")
 
 # PU SUB AND PARTICLES FOR ISO ---------------
 
@@ -54,7 +55,10 @@ pfNoPileUp.bottomCollection = 'particleFlowPtrs'
 from CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi import goodOfflinePrimaryVertices
 pfNoPileUpSequence.insert(0, goodOfflinePrimaryVertices)
 
+from RecoParticleFlow.PFProducer.pfLinker_cff import particleFlowPtrs
+
 PATCMGPileUpSubtractionSequence = cms.Sequence(
+    particleFlowPtrs +
     pfNoPileUpSequence +
     pfParticleSelectionSequence
     )
