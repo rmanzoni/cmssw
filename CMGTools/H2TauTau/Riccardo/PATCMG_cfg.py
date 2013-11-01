@@ -97,9 +97,10 @@ print 'cloning the jet sequence to build PU chs jets'
 from PhysicsTools.PatAlgos.tools.helpers import cloneProcessingSnippet
 process.PATCMGJetCHSSequence = cloneProcessingSnippet(process, process.PATCMGJetSequence, 'CHS')
 process.PATCMGJetCHSSequence.insert( 0, process.ak5PFJetsCHS )
+
 from CMGTools.Common.Tools.visitorUtils import replaceSrc
 replaceSrc( process.PATCMGJetCHSSequence, 'ak5PFJets', 'ak5PFJetsCHS')
-replaceSrc( process.PATCMGJetCHSSequence, 'particleFlowTmpPtrs', 'pfNoPileUp')
+replaceSrc( process.PATCMGJetCHSSequence, 'particleFlowPtrs', 'pfNoPileUp')
 # replaceSrc( process.PATCMGJetCHSSequence, 'particleFlow', 'pfNoPileUp')
 #process.PATCMGJetCHSSequence.remove(process.outTracksCHS) # not needed for CHS jets
 #process.PATCMGJetCHSSequence.remove(process.ak5SoftTrackJetsForVbfHbbCHS) # not needed for CHS jets

@@ -112,6 +112,7 @@ from CMGTools.Common.PAT.patElectronsWithTrigger_cff import *
 # from CMGTools.Common.PAT.patElectronsWithMVA_cfi import * 
 from CMGTools.Common.PAT.patElectronsWithRegressionVars_cfi import * 
 from CMGTools.Common.PAT.patElectronsWithDirectionalIsolation_cfi import * 
+from CMGTools.Common.PAT.pfNoPileUpBackFromPointer_cfi import * 
 
 # conversions
 from CMGTools.Common.PAT.patConversions_cfi import patConversions
@@ -123,6 +124,7 @@ PATElectronSequence = cms.Sequence(
     makePatElectrons +
     selectedPatElectrons + 
     # patElectronsWithMVA + # not used, and creates problem in git migration
+    pfNoPileUpBackFromPointer +
     patElectronsWithDirectionalIsolation +
     patElectronsWithRegressionVars +
     patElectronsWithTriggerSequence +
