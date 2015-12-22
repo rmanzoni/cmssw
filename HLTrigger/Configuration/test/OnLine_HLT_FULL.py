@@ -1,11 +1,11 @@
-# /dev/CMSSW_7_6_0/HLT/V13 (CMSSW_7_6_3)
+# /dev/CMSSW_7_6_0/HLT/V14 (CMSSW_7_6_3)
 
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process( "HLTFULL" )
 
 process.HLTConfigVersion = cms.PSet(
-  tableName = cms.string('/dev/CMSSW_7_6_0/HLT/V13')
+  tableName = cms.string('/dev/CMSSW_7_6_0/HLT/V14')
 )
 
 process.HLTPSetInitialStepTrajectoryFilterBase = cms.PSet( 
@@ -3308,7 +3308,7 @@ process.hcalRecAlgos = cms.ESProducer( "HcalRecAlgoESProducer",
 )
 process.hcal_db_producer = cms.ESProducer( "HcalDbProducer" )
 process.hltCombinedSecondaryVertex = cms.ESProducer( "CombinedSecondaryVertexESProducer",
-  recordLabel = cms.string( "" ),
+  recordLabel = cms.string( "HLT" ),
   categoryVariableName = cms.string( "vertexCategory" ),
   useTrackWeights = cms.bool( True ),
   useCategories = cms.bool( True ),
@@ -3363,7 +3363,7 @@ process.hltCombinedSecondaryVertex = cms.ESProducer( "CombinedSecondaryVertexESP
   trackFlip = cms.bool( False )
 )
 process.hltCombinedSecondaryVertexV2 = cms.ESProducer( "CombinedSecondaryVertexESProducer",
-  recordLabel = cms.string( "" ),
+  recordLabel = cms.string( "HLT" ),
   categoryVariableName = cms.string( "vertexCategory" ),
   useTrackWeights = cms.bool( True ),
   useCategories = cms.bool( True ),

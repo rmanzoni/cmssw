@@ -1,11 +1,11 @@
-# /dev/CMSSW_7_6_0/PIon/V7 (CMSSW_7_6_3)
+# /dev/CMSSW_7_6_0/PIon/V8 (CMSSW_7_6_3)
 
 import FWCore.ParameterSet.Config as cms
 
 fragment = cms.ProcessFragment( "HLT" )
 
 fragment.HLTConfigVersion = cms.PSet(
-  tableName = cms.string('/dev/CMSSW_7_6_0/PIon/V7')
+  tableName = cms.string('/dev/CMSSW_7_6_0/PIon/V8')
 )
 
 fragment.HLTPSetInitialStepTrajectoryFilterBase = cms.PSet( 
@@ -1254,7 +1254,7 @@ fragment.hcalRecAlgos = cms.ESProducer( "HcalRecAlgoESProducer",
     'HcalCellDead' )
 )
 fragment.hltCombinedSecondaryVertex = cms.ESProducer( "CombinedSecondaryVertexESProducer",
-  recordLabel = cms.string( "" ),
+  recordLabel = cms.string( "HLT" ),
   categoryVariableName = cms.string( "vertexCategory" ),
   useTrackWeights = cms.bool( True ),
   useCategories = cms.bool( True ),
@@ -1309,7 +1309,7 @@ fragment.hltCombinedSecondaryVertex = cms.ESProducer( "CombinedSecondaryVertexES
   trackFlip = cms.bool( False )
 )
 fragment.hltCombinedSecondaryVertexV2 = cms.ESProducer( "CombinedSecondaryVertexESProducer",
-  recordLabel = cms.string( "" ),
+  recordLabel = cms.string( "HLT" ),
   categoryVariableName = cms.string( "vertexCategory" ),
   useTrackWeights = cms.bool( True ),
   useCategories = cms.bool( True ),
