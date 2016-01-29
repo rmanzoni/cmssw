@@ -2,7 +2,7 @@
 #define MAPAnalyzer_H
 
 
-#include "JMEAnalysis/JMEValidator/interface/Analyzer.h"
+#include "RecoMET/METPUSubtraction/interface/Analyzer.h"
 class MAPAnalyzer : public JME::Analyzer {
     public:
         // construction/destruction

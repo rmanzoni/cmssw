@@ -1,7 +1,7 @@
 #ifndef METAnalyzer_H
 #define METAnalyzer_H
 
-#include "JMEAnalysis/JMEValidator/interface/PhysicsObjectAnalyzer.h"
+#include "RecoMET/METPUSubtraction/interface/PhysicsObjectAnalyzer.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Math/interface/deltaPhi.h"

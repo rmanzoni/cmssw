@@ -92,7 +92,7 @@ process = createProcess(options.isMC, ## MC or data
                         options.jetPtCut,
                         options.useJECFromDB ## JEC
                         );
-from JMEAnalysis.JMEValidator.FrameworkConfiguration import runMVAMET
+from RecoMET.METPUSubtraction.FrameworkConfiguration import runMVAMET
 
 runMVAMET( process, 
                   "MVAMET",

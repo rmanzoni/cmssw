@@ -4,7 +4,7 @@
 #include "FWCore/Framework/interface/Run.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
-#include "JMEAnalysis/JMEValidator/interface/Analyzer.h"
+#include "RecoMET/METPUSubtraction/interface/Analyzer.h"
 
 class RunAnalyzer: public JME::Analyzer {
     public:

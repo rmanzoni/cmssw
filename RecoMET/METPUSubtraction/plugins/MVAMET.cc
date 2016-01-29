@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "JMEAnalysis/JMEValidator/plugins/MVAMET.h"
+#include "RecoMET/METPUSubtraction/plugins/MVAMET.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/Candidate/interface/Particle.h"
 

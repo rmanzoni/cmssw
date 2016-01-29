@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "JMEAnalysis/JMEValidator/interface/Analyzer.h"
+#include "RecoMET/METPUSubtraction/interface/Analyzer.h"
 
 #include <Math/Vector4D.h>
 

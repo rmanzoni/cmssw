@@ -1,8 +1,7 @@
-#ifndef JMEValidator_MVAMET_h
-#define JMEValidator_MVAMET_h
+#ifndef MVAMET_h
+#define MVAMET_h
 
 /** \class MVAMET
- *  * Apply recoil corrections and improve PUPPI missing Et (a.k.a. PUPPET) 
  * */
 
 #include "FWCore/Framework/interface/stream/EDProducer.h"

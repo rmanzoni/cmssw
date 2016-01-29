@@ -1,6 +1,6 @@
 #include "FWCore/Utilities/interface/BranchType.h"
 
-#include "JMEAnalysis/JMEValidator/interface/RunAnalyzer.h"
+#include "RecoMET/METPUSubtraction/interface/RunAnalyzer.h"
 
 RunAnalyzer::RunAnalyzer(const edm::ParameterSet& iConfig): JME::Analyzer(iConfig),
     genRunInfoToken_ (consumes<GenRunInfoProduct, edm::BranchType::InRun>(edm::InputTag("generator")))

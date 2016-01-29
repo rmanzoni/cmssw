@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 import sys
 
-from JMEAnalysis.JMEValidator.LeptonSelectionTools_cff import applyMuonID
-from JMEAnalysis.JMEValidator.LeptonSelectionTools_cff import applyElectronID
-from JMEAnalysis.JMEValidator.LeptonSelectionTools_cff import applyTauID
-from JMEAnalysis.JMEValidator.LeptonSelectionTools_cff import cleanJetsFromLeptons
+from RecoMET.METPUSubtraction.LeptonSelectionTools_cff import applyMuonID
+from RecoMET.METPUSubtraction.LeptonSelectionTools_cff import applyElectronID
+from RecoMET.METPUSubtraction.LeptonSelectionTools_cff import applyTauID
+from RecoMET.METPUSubtraction.LeptonSelectionTools_cff import cleanJetsFromLeptons
 from RecoMET.METProducers.PFMET_cfi import pfMet
 from JetMETCorrections.Type1MET.correctionTermsPfMetType1Type2_cff import corrPfMetType1
 from JetMETCorrections.Type1MET.correctedMet_cff import pfMetT1
@@ -273,7 +273,7 @@ def runMVAMET(process,
                                                 srcVertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                                 srcTaus        = cms.InputTag(srcTaus+tauTypeID+"Cleaned"),
                                                 srcMuons       = cms.InputTag(srcMuons+muonTypeID),
-                                                weightFile     = cms.FileInPath('JMEAnalysis/JMEValidator/data/weightfile.root'),
+                                                weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
                                                 srcLeptons  = cms.VInputTag("LeptonMerge"),
                                                 ZbosonLabel = cms.string("ZtagBoson"),
                                                 saveMap = cms.bool(True)

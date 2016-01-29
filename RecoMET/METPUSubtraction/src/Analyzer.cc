@@ -1,7 +1,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "JMEAnalysis/JMEValidator/interface/Analyzer.h"
+#include "RecoMET/METPUSubtraction/interface/Analyzer.h"
 
 #include <TTree.h>
 

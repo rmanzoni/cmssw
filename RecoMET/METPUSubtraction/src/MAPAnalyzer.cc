@@ -1,5 +1,5 @@
 
-#include "JMEAnalysis/JMEValidator/interface/MAPAnalyzer.h"
+#include "RecoMET/METPUSubtraction/interface/MAPAnalyzer.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 MAPAnalyzer::MAPAnalyzer(const edm::ParameterSet& iConfig):

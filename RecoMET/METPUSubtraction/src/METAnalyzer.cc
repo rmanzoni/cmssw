@@ -6,7 +6,7 @@
 //                        05/2015    Sébastien Brochet <sebastien.brochet@cern.ch>
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "JMEAnalysis/JMEValidator/interface/METAnalyzer.h"
+#include "RecoMET/METPUSubtraction/interface/METAnalyzer.h"
 #include "DataFormats/Math/interface/normalizedPhi.h"
 #include <vector>
 #include <iostream>
