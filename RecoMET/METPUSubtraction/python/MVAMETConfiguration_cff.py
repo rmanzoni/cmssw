@@ -173,10 +173,8 @@ def runMVAMET(process,
                                                 srcMuons       = cms.InputTag(srcMuons+muonTypeID),
                                                 srcElectrons   = cms.InputTag("slimmedElectrons"),
                                                 weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
-                                                #srcLeptons  = cms.VInputTag("LeptonMerge"),
-                                                #srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"),
-                                                srcLeptons  = cms.VInputTag("slimmedMuons"),
-                                                #srcLeptons  = cms.VInputTag(cms.InputTag(srcMuons+muonTypeID)),
+                                                #srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
+                                                srcLeptons  = cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"),
                                                 tausSignificance = cms.InputTag('tausSignificance', 'METCovariance'),
                                                 saveMap = cms.bool(True)
                                                 ))
