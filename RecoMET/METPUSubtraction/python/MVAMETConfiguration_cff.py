@@ -134,7 +134,14 @@ def runMVAMET(process,
     ## PU MET
     process.pfPUMETCands = cms.EDProducer("CandViewMerger", src = cms.VInputTag(          cms.InputTag("pfChargedPU"),
                                                                                           cms.InputTag("neutralInJets", "neutralFailingPUIDJets")))
-                                                              
+    
+    ##Experimental
+    process.pfChargedPUMETCands = cms.EDProducer("CandViewMerger", src = cms.VInputTag(cms.InputTag("pfChargedPU")))
+    process.pfNeutralPUMETCands = cms.EDProducer("CandViewMerger", src = cms.VInputTag(cms.InputTag("neutralInJets", "neutralFailingPUIDJets")))
+    process.pfNeutralPVMETCands = cms.EDProducer("CandViewMerger", src = cms.VInputTag(cms.InputTag("neutralInJets", "neutralPassingPUIDJets")))
+    process.pfNeutralUnclusteredMETCands = cms.EDProducer("CandViewMerger", src = cms.VInputTag(cms.InputTag("neutralInJets", "neutralParticlesUnclustered")))
+
+                                                          
     from PhysicsTools.PatAlgos.producersLayer1.metProducer_cfi import patMETs
     patMETsForMVA = patMETs.clone()
     patMETsForMVA.computeMETSignificance = cms.bool(True)
@@ -143,7 +150,7 @@ def runMVAMET(process,
     #patMETsForMVA.srcLeptons = cms.InputTag("selectedPatJetsAK4PF")
     setattr(patMETsForMVA,"srcLeptons", cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"))
 
-    for met in ["pfMET", "pfTrackMET", "pfNoPUMET", "pfPUCorrectedMET", "pfPUMET"]:
+    for met in ["pfMET", "pfTrackMET", "pfNoPUMET", "pfPUCorrectedMET", "pfPUMET", "pfChargedPUMET", "pfNeutralPUMET", "pfNeutralPVMET", "pfNeutralUnclusteredMET"]:
         setattr(process, met, pfMet.clone())
         setattr(getattr(process, met), "src", cms.InputTag(met+"Cands"))
         setattr(getattr(process, met), "alias", cms.string(met))
@@ -157,6 +164,7 @@ def runMVAMET(process,
                                                 debug = cms.bool(False),
                                                 requireOS = cms.bool(True),
                                                 combineNLeptons = cms.int32(2),
+                                                MVAMETLabel = cms.string("MVAMET"),
                                                 srcMETs      = cms.VInputTag(
                                                                              cms.InputTag("slimmedMETs"),
                                                                              cms.InputTag("patpfMET"),
@@ -165,8 +173,12 @@ def runMVAMET(process,
                                                                              cms.InputTag("patpfPUCorrectedMET"),
                                                                              cms.InputTag("patpfPUMET"),
                                                                              cms.InputTag("slimmedMETsPuppi"),
+                                                                             cms.InputTag("patpfChargedPUMET"),
+                                                                             cms.InputTag("patpfNeutralPUMET"),
+                                                                             cms.InputTag("patpfNeutralPVMET"),
+                                                                             cms.InputTag("patpfNeutralUnclusteredMET")
                                                                             ),
-                                                inputMETFlags = cms.vint32(0,0,0,1,0,0,2,0),
+                                                inputMETFlags = cms.vint32(0,0,0,1,0,0,2,0,2,1,1,1),
                                                 srcJets        = cms.InputTag(jetCollectionPF+"Cleaned"),
                                                 srcVertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                                 srcTaus        = cms.InputTag(srcTaus+tauTypeID+"Cleaned"),
@@ -176,5 +188,6 @@ def runMVAMET(process,
                                                 #srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
                                                 srcLeptons  = cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"),
                                                 tausSignificance = cms.InputTag('tausSignificance', 'METCovariance'),
+                                                produceRecoils = cms.bool(False),
                                                 saveMap = cms.bool(True)
                                                 ))
