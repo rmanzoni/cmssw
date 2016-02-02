@@ -62,7 +62,7 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
 
 MVAMET::~MVAMET(){}
 
-void MVAMET::calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt, float divisor)
+void MVAMET::calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt, const pat::MET& referenceMET)
 {
 
     reco::METCovMatrix rotateToZFrame;
@@ -95,7 +95,7 @@ void MVAMET::calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt, f
       evt.put(patMETRecoilCollection, "recoil"+MET->collection_name);
     }
 
-    addToMap(Recoil.p4(), Recoil.sumEt(), "recoil"+ MET->collection_name, divisor, rotatedCovMatrix);
+    addToMap(Recoil.p4(), Recoil.sumEt(), "recoil"+ MET->collection_name, referenceMET, rotatedCovMatrix);
 
 }
 
@@ -330,7 +330,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
           MET.sumEt_TauJetNeutral += particle->p4().Et();
         }
       }    
-      calculateRecoil(&MET, Z, evt, referenceRecoil.sumEt());
+      calculateRecoil(&MET, Z, evt, referenceRecoil);
     }
 
     // evaluate phi training and apply angular correction
@@ -339,7 +339,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
     auto refRecoil = TVector2(referenceRecoil.p4().px(), referenceRecoil.p4().py());
     refRecoil = refRecoil.Rotate(PhiAngle);
     reco::Candidate::LorentzVector phiCorrectedRecoil(refRecoil.Px(), refRecoil.Py(), 0, referenceMET.sumEt());
-    addToMap(phiCorrectedRecoil, referenceMET.sumEt(), "PhiCorrectedRecoil", 1);
+    addToMap(phiCorrectedRecoil, referenceMET.sumEt(), "PhiCorrectedRecoil");
   
     var_["PhiCorrectedRecoil_Phi"] = TVector2::Phi_mpi_pi(refRecoil.Phi());
 
@@ -351,7 +351,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
     pat::MET recoilmvaMET(referenceMET);
     reco::Candidate::LorentzVector recoilP4(refRecoil.Px(), refRecoil.Py(), 0, referenceMET.sumEt());
     recoilmvaMET.setP4(recoilP4);
-    addToMap(recoilP4, referenceMET.sumEt(), "LongZCorrectedRecoil", 1);
+    addToMap(recoilP4, referenceMET.sumEt(), "LongZCorrectedRecoil");
 
     // evaluate covariance matrix regression
     Float_t CovU1 = GetResponse(mvaReaderCovU1_, variablesForCovU1_) * refRecoil.Mod();
@@ -414,11 +414,13 @@ void MVAMET::saveMap(edm::Event& evt)
 
 }
 
-void MVAMET::addToMap(reco::Candidate::LorentzVector p4, double sumEt, const std::string &type, double divisor, reco::METCovMatrix &covMatrix)
+void MVAMET::addToMap(reco::Candidate::LorentzVector p4, double sumEt, const std::string &type, const pat::MET &referenceMET, reco::METCovMatrix &covMatrix)
 {
-  addToMap(p4, sumEt, type, divisor);
+  addToMap(p4, sumEt, type);
   var_[type +  "_Cov00" ] = covMatrix(0,0);
   var_[type +  "_Cov11" ] = covMatrix(1,1);
+  var_[type + "_sumEtFraction" ] = sumEt/referenceMET.sumEt();
+  var_[type + "_dPhi" ] = TVector2::Phi_mpi_pi(p4.phi() - referenceMET.phi());
 }
 
 void MVAMET::addToMap(recoilingBoson &Z)
@@ -432,12 +434,11 @@ void MVAMET::addToMap(recoilingBoson &Z)
   
 }
 
-void MVAMET::addToMap(reco::Candidate::LorentzVector p4, double sumEt, const std::string &type, double divisor)
+void MVAMET::addToMap(reco::Candidate::LorentzVector p4, double sumEt, const std::string &type)
 {
   var_[type + "_Pt" ] = p4.pt();
   var_[type + "_Phi" ] = p4.phi();
   var_[type + "_sumEt" ] = sumEt;
-  var_[type + "_sumEtFraction" ] = sumEt/divisor;
 }
 
 unsigned int MVAMET::countJets(const pat::JetCollection& jets, const float maxPt){
