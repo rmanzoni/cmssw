@@ -2,9 +2,6 @@
 
 #include "RecoMET/METPUSubtraction/plugins/MVAMET.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "DataFormats/Candidate/interface/Particle.h"
-
-typedef std::vector<reco::Particle> ParticleCollection;
 
 MVAMET::MVAMET(const edm::ParameterSet& cfg){
   produces<std::vector<std::string>>();
@@ -12,8 +9,8 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
   // get MET that the mva is applied on
   referenceMET_      = consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("referenceMET"));
 
-  produceRecoils_ = (cfg.existsAs<bool>("produceRecoils")) ? cfg.getParameter<bool>("produceRecoils") : false;
-  saveMap_ = (cfg.existsAs<bool>("saveMap")) ? cfg.getParameter<bool>("saveMap") : false;
+  produceRecoils_ = cfg.getParameter<bool>("produceRecoils");
+  saveMap_ = cfg.getParameter<bool>("saveMap");
 
   // get tokens for input METs and prepare for saving the corresponding recoils to the event
   srcMETTags_   = cfg.getParameter<vInputTag>("srcMETs");
@@ -24,13 +21,12 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
   }
   
   // take flags for the met
-  if (cfg.existsAs<std::vector<int> >("inputMETFlags"))
-    srcMETFlags_ = cfg.getParameter<std::vector<int>>("inputMETFlags");
+  srcMETFlags_ = cfg.getParameter<std::vector<int>>("inputMETFlags");
   
   if(srcMETFlags_.size() != srcMETTags_.size()+1)
     throw cms::Exception("MVAMET::MVAMET") << " Failed to load MET flags   !!\n";
 
-  //get leptons to calculate Z vector and save it as a reco::candidate back to the event
+  //get leptons to calculate Z vector
   vInputTag srcLeptonsTags = cfg.getParameter<vInputTag>("srcLeptons");
   for(vInputTag::const_iterator it=srcLeptonsTags.begin();it!=srcLeptonsTags.end();it++) {
     srcLeptons_.push_back( consumes<reco::CandidateView >( *it ) );
@@ -39,29 +35,24 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
   debug_ = (cfg.existsAs<bool>("debug")) ? cfg.getParameter<bool>("debug") : false;
   combineNLeptons_ = cfg.getParameter<int>("combineNLeptons");
   requireOS_ = cfg.getParameter<bool>("requireOS");
+
   srcVertices_  = consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("srcVertices"));
   srcJets_      = consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("srcJets"));
   srcTaus_      = consumes<pat::TauCollection>(cfg.getParameter<edm::InputTag>("srcTaus"));
   srcMuons_     = consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("srcMuons"));
-//  srcElectrons_ = consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("srcElectrons"));
-
   srcTausSignificance_ = consumes<math::Error<2>::type>(cfg.getParameter<edm::InputTag>("tausSignificance"));
 
 
   // load weight files
   edm::FileInPath weightFile; 
-  if(cfg.existsAs<edm::FileInPath>("weightFile"))
-    weightFile = cfg.getParameter<edm::FileInPath>("weightFile");
+  weightFile = cfg.getParameter<edm::FileInPath>("weightFile");
   mvaReaderPhiCorrection_     = loadMVAfromFile(weightFile, variablesForPhiTraining_, "PhiCorrectedRecoil"); 
   mvaReaderRecoilCorrection_  = loadMVAfromFile(weightFile, variablesForRecoilTraining_, "LongZCorrectedRecoil");
   mvaReaderCovU1_             = loadMVAfromFile(weightFile, variablesForCovU1_, "CovU1");
   mvaReaderCovU2_             = loadMVAfromFile(weightFile, variablesForCovU2_, "CovU2");
 
   // prepare for saving the final mvaMET to the event
-  if(cfg.existsAs<std::string>("MVAMETLabel"))
-    mvaMETLabel_ = cfg.getParameter<std::string>("MVAMETLabel");
-  else
-    mvaMETLabel_ = "MVAMET";
+  mvaMETLabel_ = cfg.getParameter<std::string>("MVAMETLabel");
 
   produces<pat::METCollection>(mvaMETLabel_);
   if(produceRecoils_)
@@ -250,11 +241,12 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
   var_.clear();
   Bosons_.clear();
 
+  // get taus
   edm::Handle<pat::TauCollection> tauCollectionHandle;
   evt.getByToken(srcTaus_, tauCollectionHandle);
   const pat::TauCollection tauCollection = *(tauCollectionHandle.product());
 
-  // take mu lepton collection
+  // get muons
   edm::Handle<pat::MuonCollection> muCollectionHandle;
   evt.getByToken(srcMuons_, muCollectionHandle);
   const pat::MuonCollection muCollection = *(muCollectionHandle.product());
@@ -271,6 +263,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
   //fill allLeptons_
   calculateRecoilingObjects(evt, muCollection, tauCollection);
 
+  //fill event meta information
   fillEventInformation(evt);
 
   // stop execution if no recoiling object has been found
@@ -290,7 +283,9 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
   evt.getByToken(referenceMET_, referenceMETs);
   assert((*referenceMETs).size() == 1);
   auto referenceMET = (*referenceMETs)[0];
- 
+
+
+  // loop on identified combinations of recoiling objects, here donted as "Z" 
   for(auto Z: Bosons_)
   {
     pat::MET referenceRecoil(referenceMET);
