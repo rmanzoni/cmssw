@@ -4,10 +4,6 @@ from FWCore.ParameterSet.VarParsing import VarParsing
 from PhysicsTools.PatAlgos.tools.tauTools import *
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import switchOnVIDElectronIdProducer, switchOnVIDPhotonIdProducer, DataFormat, setupAllVIDIdsInModule, setupVIDElectronSelection, setupVIDPhotonSelection
 from RecoMET.METPUSubtraction.MVAMETConfiguration_cff import runMVAMET
-### sample configuration
-
-#if not hasattr(sys, 'argv'):
-#  sys.argv = ["cmsRun", "runFrameworkMC.py"]
 
 options = VarParsing ('python')
 options.register ('isMC',True,VarParsing.multiplicity.singleton,VarParsing.varType.bool,'flag to indicate data or MC');
@@ -44,11 +40,8 @@ if not hasattr(process,"VersionedPhotonIdProducer"):
 process.jmfw_analyzers = cms.Sequence()
 process.p = cms.Path(process.jmfw_analyzers)
 
-
-runMVAMET( process, saveMapForTraining = False )
-
-####### files
-print options.inputFile
+# configure MVA MET
+runMVAMET( process)
 
 ## set input files
 process.source = cms.Source("PoolSource")
@@ -64,7 +57,6 @@ if options.saveMapForTraining:
     process.MAPAnalyzer = MAPAnalyzer
     process.MVAMET.saveMap = cms.bool(True)
     process.skimmvamet = cms.Sequence( process.MVAMET * process.MAPAnalyzer)
-    #process.skimmvamet = cms.Sequence( process.MVAMET)
     process.p *= (process.skimmvamet)
 
 ## logger
