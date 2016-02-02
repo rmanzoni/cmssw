@@ -14,101 +14,57 @@ from JetMETCorrections.Type1MET.correctionTermsPfMetType1Type2_cff import corrPf
 from JetMETCorrections.Type1MET.correctedMet_cff import pfMetT1
 
 def runMVAMET(process,
-                 processName,
-                 isMC,
                  srcMuons =  "slimmedMuons", ## inputMuonCollection
                  muonTypeID    = "Tight", ## type of muon ID to be applied                                                                                                   
-                 iso_map_muons = [], ## isolation maps in case they have been re-computed (charged, neutral, photon)                                                         
                  typeIsoMuons  = "dBeta", ## isolation type to be used for muons                                                                                               
                  relativeIsoCutMuons = 0.12,
                  srcElectrons = "slimmedElectrons", 
                  electronTypeID= "Tight", 
                  electronID_map = 'egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium',
-                 electronID_map_loose = 'egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose',
-                 iso_map_electrons = [], 
                  typeIsoElectrons = "rhoCorr",
                  relativeIsoCutEletrons = 0.12,
                  srcTaus = "slimmedTaus",
                  tauTypeID = "Loose",
-                 doTauCleaning = True,
                  jetCollectionPF    = "slimmedJets",
                  dRCleaning= 0.3, 
                  jetPtCut = 10, 
                  jetEtaCut =5.,
-                 genJetCollection = "",
-                 cleanGenJets = False,
-                 etaCutForMetDiagnostic = 10.,
-                 applyTypeICorrection = True, 
-                 applyZSelections = True,
-                 putRecoilInsideEvent = True
+                 saveMapForTraining = False
                  ):
 
     relativeIsoCutMuonsLoose = relativeIsoCutMuons+0.05;
     relativeIsoCutEletronsLoose = relativeIsoCutEletrons+0.05;    
 
     ### run Muon ID
-    if len(iso_map_muons) < 3 :
-        
-        applyMuonID(process, 
-                    src   = srcMuons,
-                    label = muonTypeID, 
-                    iso_map_charged_hadron  = '',
-                    iso_map_neutral_hadron  = '',
-                    iso_map_photon          = '',
-                    typeIso                 = typeIsoMuons,
-                    relativeIsolationCutVal = relativeIsoCutMuons
-                    )
-    else:
-
-        applyMuonID(process, 
-                    src   = srcMuons, 
-                    label = muonTypeID, 
-                    iso_map_charged_hadron  = iso_map_muons[0],
-                    iso_map_neutral_hadron  = iso_map_muons[1],
-                    iso_map_photon          = iso_map_muons[2],
-                    rho = 'fixedGridRhoFastjetAll',
-                    typeIso                 = typeIsoMuons,
-                    relativeIsolationCutVal = relativeIsoCutMuons
+    applyMuonID(process, 
+                src   = srcMuons,
+                label = muonTypeID, 
+                iso_map_charged_hadron  = '',
+                iso_map_neutral_hadron  = '',
+                iso_map_photon          = '',
+                typeIso                 = typeIsoMuons,
+                relativeIsolationCutVal = relativeIsoCutMuons
                 )
 
 
     ### run Electron ID
-    if len(iso_map_electrons) < 3 :
-        applyElectronID(process, 
-                        label = electronTypeID, 
-                        src   = srcElectrons,
-                        iso_map_charged_hadron  = '',
-                        iso_map_neutral_hadron  = '',
-                        iso_map_photon          = '',
-                        typeIso = typeIsoElectrons,
-                        electron_id_map = electronID_map,
-                        relativeIsolationCutVal = relativeIsoCutEletrons
-                        )
-    else:
-        applyElectronID(process, 
-                        label = electronTypeID, 
-                        src   = srcElectrons,
-                        iso_map_charged_hadron  = iso_map_electrons[0],
-                        iso_map_neutral_hadron  = iso_map_electrons[1],
-                        iso_map_photon          = iso_map_electrons[2],
-                        typeIso = typeIsoElectrons,
-                        electron_id_map = electronID_map,
-                        relativeIsolationCutVal = relativeIsoCutEletrons
-                        )
+    applyElectronID(process, 
+                    label = electronTypeID, 
+                    src   = srcElectrons,
+                    iso_map_charged_hadron  = '',
+                    iso_map_neutral_hadron  = '',
+                    iso_map_photon          = '',
+                    typeIso = typeIsoElectrons,
+                    electron_id_map = electronID_map,
+                    relativeIsolationCutVal = relativeIsoCutEletrons
+                    )
 
     ### run tau ID                                        
-    if doTauCleaning :
-        applyTauID( process, 
-                    label = tauTypeID, 
-                    src = srcTaus,
-                    muonCollection     = srcMuons+muonTypeID,
-                    electronCollection = srcElectrons+electronTypeID)
-
-    else:
-        applyTauID( process, label = tauTypeID, 
-                    src = srcTaus,
-                    muonCollection     = "",
-                    electronCollection = "")
+    applyTauID( process, 
+                label = tauTypeID, 
+                src = srcTaus,
+                muonCollection     = srcMuons+muonTypeID,
+                electronCollection = srcElectrons+electronTypeID)
 
     ## jet lepton cleaning
 

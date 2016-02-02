@@ -276,5 +276,5 @@ def runMVAMET(process,
                                                 weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
                                                 srcLeptons  = cms.VInputTag("LeptonMerge"),
                                                 ZbosonLabel = cms.string("ZtagBoson"),
-                                                saveMap = cms.bool(True)
+                                                saveMap = cms.bool(False)
                                                 ))
