@@ -24,7 +24,7 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
   srcMETFlags_ = cfg.getParameter<std::vector<int>>("inputMETFlags");
   
   if(srcMETFlags_.size() != srcMETTags_.size()+1)
-    throw cms::Exception("MVAMET::MVAMET") << " Failed to load MET flags   !!\n";
+    throw cms::Exception("MVAMET::MVAMET") << " Failed to load MET flags   !!\n" << "Expected " << srcMETTags_.size()+1 << " but got " << srcMETFlags_.size() << std::endl;
 
   //get leptons to calculate Z vector
   vInputTag srcLeptonsTags = cfg.getParameter<vInputTag>("srcLeptons");
