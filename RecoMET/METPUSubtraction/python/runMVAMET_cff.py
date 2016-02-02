@@ -10,8 +10,6 @@ from JetMETCorrections.Type1MET.correctionTermsPfMetType1Type2_cff import corrPf
 from JetMETCorrections.Type1MET.correctedMet_cff import pfMetT1
 
 def runMVAMET(process,
-                 processName,
-                 isMC,
                  srcMuons =  "slimmedMuons", ## inputMuonCollection
                  muonTypeID    = "Tight", ## type of muon ID to be applied                                                                                                   
                  iso_map_muons = [], ## isolation maps in case they have been re-computed (charged, neutral, photon)                                                         
@@ -38,7 +36,7 @@ def runMVAMET(process,
                  applyZSelections = True,
                  putRecoilInsideEvent = True
                  ):
-
+    print "running"
     relativeIsoCutMuonsLoose = relativeIsoCutMuons+0.05;
     relativeIsoCutEletronsLoose = relativeIsoCutEletrons+0.05;    
 
@@ -256,25 +254,26 @@ def runMVAMET(process,
 
 
     ### MVA MET
-    setattr(process,"MVAMET", cms.EDProducer("MVAMET",                                                
-                                                referenceMET = cms.InputTag("slimmedMETs"),
-                                                debug = cms.bool(False),
-                                                srcMETs      = cms.VInputTag(
-                                                                             cms.InputTag("slimmedMETs"),
-                                                                             cms.InputTag("patpfMET"),
-                                                                             cms.InputTag("patpfTrackMET"),
-                                                                             cms.InputTag("patpfNoPUMET"),
-                                                                             cms.InputTag("patpfPUCorrectedMET"),
-                                                                             cms.InputTag("patpfPUMET"),
-                                                                             cms.InputTag("slimmedMETsPuppi"),
-                                                                            ),
-                                                inputMETFlags = cms.vint32(0,0,0,1,0,0,2,0),
-                                                srcJets        = cms.InputTag(jetCollectionPF+"Cleaned"),
-                                                srcVertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                                                srcTaus        = cms.InputTag(srcTaus+tauTypeID+"Cleaned"),
-                                                srcMuons       = cms.InputTag(srcMuons+muonTypeID),
-                                                weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
-                                                srcLeptons  = cms.VInputTag("LeptonMerge"),
-                                                ZbosonLabel = cms.string("ZtagBoson"),
-                                                saveMap = cms.bool(False)
-                                                ))
+    process.MVAMET = cms.EDProducer("MVAMET",                                                
+                                    referenceMET = cms.InputTag("slimmedMETs"),
+                                    combineNLeptons = cms.int32(2),
+                                    requireOS = cms.bool(True),
+                                    debug = cms.bool(False),
+                                    srcMETs      = cms.VInputTag(
+                                                                 cms.InputTag("slimmedMETs"),
+                                                                 cms.InputTag("patpfMET"),
+                                                                 cms.InputTag("patpfTrackMET"),
+                                                                 cms.InputTag("patpfNoPUMET"),
+                                                                 cms.InputTag("patpfPUCorrectedMET"),
+                                                                 cms.InputTag("patpfPUMET"),
+                                                                 cms.InputTag("slimmedMETsPuppi"),
+                                                                ),
+                                    inputMETFlags = cms.vint32(0,0,0,1,0,0,2,0),
+                                    srcJets        = cms.InputTag(jetCollectionPF+"Cleaned"),
+                                    srcVertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
+                                    srcTaus        = cms.InputTag(srcTaus+tauTypeID+"Cleaned"),
+                                    srcMuons       = cms.InputTag(srcMuons+muonTypeID),
+                                    weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
+                                    srcLeptons  = cms.VInputTag("LeptonMerge"),
+                                    saveMap = cms.bool(False)
+                                    )

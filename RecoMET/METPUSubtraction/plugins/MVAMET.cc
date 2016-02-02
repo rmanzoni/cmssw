@@ -45,6 +45,9 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
   srcMuons_     = consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("srcMuons"));
 //  srcElectrons_ = consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("srcElectrons"));
 
+  srcTausSignificance_ = consumes<math::Error<2>::type>(cfg.getParameter<edm::InputTag>("tausSignificance"));
+
+
   // load weight files
   edm::FileInPath weightFile; 
   if(cfg.existsAs<edm::FileInPath>("weightFile"))
@@ -256,6 +259,15 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
   evt.getByToken(srcMuons_, muCollectionHandle);
   const pat::MuonCollection muCollection = *(muCollectionHandle.product());
 
+  // read in additional taus significance contribution
+  edm::Handle<math::Error<2>::type> tausSignificance;
+  evt.getByToken(srcTausSignificance_, tausSignificance);
+  reco::METCovMatrix tausMatrix; 
+  tausMatrix(0,0) = (*tausSignificance)(0,0);
+  tausMatrix(1,0) = (*tausSignificance)(1,0);
+  tausMatrix(0,1) = (*tausSignificance)(0,1);
+  tausMatrix(1,1) = (*tausSignificance)(1,1);
+
   //fill allLeptons_
   calculateRecoilingObjects(evt, muCollection, tauCollection);
 
@@ -365,7 +377,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
     mvaMETCov(0, 1) = -std::pow(CovU1, 2) * sinPhi*cosPhi + std::pow(CovU2, 2) * sinPhi*cosPhi;
     mvaMETCov(1, 0) =  mvaMETCov(0, 1);
     mvaMETCov(1, 1) =  std::pow(CovU1, 2) * sinPhi*sinPhi + std::pow(CovU2, 2) * cosPhi*cosPhi;
-    mvaMET.setSignificanceMatrix(mvaMETCov);
+    mvaMET.setSignificanceMatrix(mvaMETCov + tausMatrix);
 
     // add constituent info to pat::MET
     size_t iCount=0;

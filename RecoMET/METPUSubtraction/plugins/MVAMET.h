@@ -112,7 +112,7 @@ private:
   edm::EDGetTokenT<pat::TauCollection>                 srcTaus_;
   edm::EDGetTokenT<pat::MuonCollection>                srcMuons_;
 //  edm::EDGetTokenT<pat::ElectronCollection>            srcElectrons_;
-  
+  edm::EDGetTokenT<math::Error<2>::type> srcTausSignificance_; 
   std::string referenceMET_name_;
   
   std::vector<int> srcMETFlags_;

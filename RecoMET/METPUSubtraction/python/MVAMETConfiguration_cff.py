@@ -32,6 +32,13 @@ def runMVAMET(process,
                  saveMapForTraining = False
                  ):
 
+    # additional contribution from hadronically decaying taus
+    from RecoMET.METPUSubtraction.tausSignificance import tausSignificance, tauMET, tauPFMET, tauDecayProducts
+    process.tausSignificance = tausSignificance
+    process.tauMET = tauMET
+    process.tauPFMET = tauPFMET
+    process.tauDecayProducts = tauDecayProducts
+   
     relativeIsoCutMuonsLoose = relativeIsoCutMuons+0.05;
     relativeIsoCutEletronsLoose = relativeIsoCutEletrons+0.05;    
 
@@ -170,5 +177,6 @@ def runMVAMET(process,
                                                 #srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"),
                                                 srcLeptons  = cms.VInputTag("slimmedMuons"),
                                                 #srcLeptons  = cms.VInputTag(cms.InputTag(srcMuons+muonTypeID)),
+                                                tausSignificance = cms.InputTag('tausSignificance', 'METCovariance'),
                                                 saveMap = cms.bool(True)
                                                 ))
