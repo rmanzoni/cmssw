@@ -19,8 +19,8 @@ def runMVAMET(process,
                  typeIsoMuons  = "dBeta", ## isolation type to be used for muons                                                                                               
                  relativeIsoCutMuons = 0.12,
                  srcElectrons = "slimmedElectrons", 
-                 electronTypeID= "Tight", 
-                 electronID_map = 'egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium',
+                 #electronTypeID= "Tight", 
+                 #electronID_map = 'egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight',
                  typeIsoElectrons = "rhoCorr",
                  relativeIsoCutEletrons = 0.12,
                  srcTaus = "slimmedTaus",
@@ -55,6 +55,7 @@ def runMVAMET(process,
 
 
     ### run Electron ID
+    """
     applyElectronID(process, 
                     label = electronTypeID, 
                     src   = srcElectrons,
@@ -65,13 +66,14 @@ def runMVAMET(process,
                     electron_id_map = electronID_map,
                     relativeIsolationCutVal = relativeIsoCutEletrons
                     )
+    """
 
     ### run tau ID                                        
     applyTauID( process, 
                 label = tauTypeID, 
                 src = srcTaus,
                 muonCollection     = srcMuons+muonTypeID,
-                electronCollection = srcElectrons+electronTypeID)
+                electronCollection = "slimmedElectrons")
 
     ## jet lepton cleaning
 
@@ -79,7 +81,7 @@ def runMVAMET(process,
                          label = "Cleaned",
                          jetCollection      = jetCollectionPF,
                          muonCollection     = srcMuons+muonTypeID,
-                         electronCollection = srcElectrons+electronTypeID,
+                         electronCollection = "slimmedElectrons",
                          tauCollection      = srcTaus+tauTypeID+"Cleaned",
                          jetPtCut   = jetPtCut,
                          jetEtaCut  = jetEtaCut,
@@ -148,7 +150,7 @@ def runMVAMET(process,
     patMETsForMVA.addGenMET = cms.bool(False)
     patMETsForMVA.srcJets = cms.InputTag(jetCollectionPF)
     #patMETsForMVA.srcLeptons = cms.InputTag("selectedPatJetsAK4PF")
-    setattr(patMETsForMVA,"srcLeptons", cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"))
+    setattr(patMETsForMVA,"srcLeptons", cms.VInputTag("slimmedElectrons", "slimmedMuons", "slimmedTaus"))
 
     for met in ["pfMET", "pfTrackMET", "pfNoPUMET", "pfPUCorrectedMET", "pfPUMET", "pfChargedPUMET", "pfNeutralPUMET", "pfNeutralPVMET", "pfNeutralUnclusteredMET"]:
         setattr(process, met, pfMet.clone())
@@ -186,7 +188,8 @@ def runMVAMET(process,
                                                 srcElectrons   = cms.InputTag("slimmedElectrons"),
                                                 weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
                                                 #srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
-                                                srcLeptons  = cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"),
+                                                #srcLeptons  = cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"),
+                                                srcLeptons  = cms.VInputTag("slimmedMuons","slimmedElectrons",srcTaus+tauTypeID+"Cleaned"),
                                                 tausSignificance = cms.InputTag('tausSignificance', 'METCovariance'),
                                                 produceRecoils = cms.bool(False),
                                                 saveMap = cms.bool(True)

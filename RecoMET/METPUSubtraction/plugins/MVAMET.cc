@@ -187,8 +187,14 @@ void MVAMET::calculateRecoilingObjects(edm::Event &evt, const pat::MuonCollectio
   if(allLeptons_.size() > combineNLeptons_ )
     doCombinations(0, combineNLeptons_);
 
+  if(debug_)
+    std::cout << allLeptons_.size() << " lead to " << combinations_.size();
+
   if(requireOS_)
     cleanLeptonsFromSS();
+
+  if(debug_)
+    std::cout << " with OS: " << combinations_.size() << std::endl;
 
   for(auto leptonpair: combinations_)
   {
@@ -430,7 +436,8 @@ void MVAMET::addToMap(recoilingBoson &Z)
   var_["Boson_Eta"] = Z.p4().Eta();
   var_["Boson_M"] = Z.p4().M();
   var_["Boson_sumET"] = Z.sumEt_Leptons;
-  var_["Boson_daughter"] = std::abs(float(Z.pdgIds[1]));
+  var_["Boson_daughter1"] = float(Z.pdgIds[0]);
+  var_["Boson_daughter2"] = float(Z.pdgIds[1]);
   
 }
 
