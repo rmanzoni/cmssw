@@ -184,7 +184,7 @@ void MVAMET::calculateRecoilingObjects(edm::Event &evt, const pat::MuonCollectio
     }
   }
 
-  if(allLeptons_.size() > combineNLeptons_ )
+  if(allLeptons_.size() >= combineNLeptons_ )
     doCombinations(0, combineNLeptons_);
 
   if(debug_)
