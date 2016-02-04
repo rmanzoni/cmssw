@@ -162,7 +162,6 @@ def runMVAMET(process,
 
     ### MVA MET
     setattr(process,"MVAMET", cms.EDProducer("MVAMET",                                                
-                                                referenceMET = cms.InputTag("slimmedMETs"),
                                                 debug = cms.bool(False),
                                                 requireOS = cms.bool(True),
                                                 combineNLeptons = cms.int32(2),
@@ -180,7 +179,7 @@ def runMVAMET(process,
                                                                              cms.InputTag("patpfNeutralPVMET"),
                                                                              cms.InputTag("patpfNeutralUnclusteredMET")
                                                                             ),
-                                                inputMETFlags = cms.vint32(0,0,0,1,0,0,2,0,2,1,1,1),
+                                                inputMETFlags = cms.vint32(0,0,1,0,0,2,0,2,1,1,1),
                                                 srcJets        = cms.InputTag(jetCollectionPF+"Cleaned"),
                                                 srcVertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                                 srcTaus        = cms.InputTag(srcTaus+tauTypeID+"Cleaned"),
