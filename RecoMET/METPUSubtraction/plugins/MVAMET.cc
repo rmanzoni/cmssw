@@ -11,6 +11,10 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
 
   // get tokens for input METs and prepare for saving the corresponding recoils to the event
   srcMETTags_   = cfg.getParameter<vInputTag>("srcMETs");
+  for(vInputTag::const_iterator it=srcMETTags_.begin();it!=srcMETTags_.end();it++) {
+    srcMETs_.push_back( consumes<pat::METCollection >( *it ) );
+  }
+
   
   // take flags for the met
   srcMETFlags_ = cfg.getParameter<std::vector<int>>("inputMETFlags");
