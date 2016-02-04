@@ -312,9 +312,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
       if(i == 0)
       {
         referenceRecoil = Recoil;
-        std::cout << "setting reference to " << referenceRecoil.p4().pt() << "/" << referenceRecoil.p4().phi() << std::endl;
       }
-      std::cout << "ref: " << referenceRecoil.pt() << "/ recoil: " << Recoil.pt() << ", sumet: " << referenceRecoil.sumEt() << "/" << Recoil.sumEt();
       addToMap(Recoil, referenceRecoil);
       ++i;
     }
@@ -405,7 +403,6 @@ void MVAMET::saveMap(edm::Event& evt)
 
 void MVAMET::addToMap(const metPlus &recoil, const metPlus &referenceMET)
 {
-  std::cout << recoil.collection_name << "; reference Phi : " << referenceMET.phi() << ", recoil " << recoil.phi() << ", refsumet" << referenceMET.sumEt() << ", sumet: " << recoil.sumEt() << std::endl;
   auto type = "recoil" + recoil.collection_name;
   addToMap(recoil.p4(), recoil.sumEt(), type);
   var_[type +  "_Cov00" ] = recoil.getSignificanceMatrix()(0,0);
