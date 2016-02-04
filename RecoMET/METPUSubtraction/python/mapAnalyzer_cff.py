@@ -90,6 +90,6 @@ MAPAnalyzer =cms.EDAnalyzer('MAPAnalyzer',
                                                             "recoilpatpfNeutralUnclusteredMET_dPhi",
                                                             "recoilpatpfNeutralUnclusteredMET_sumEt",
                                                             "recoilpatpfNeutralUnclusteredMET_sumEtFraction",
-                                                            "Boson_Pt", "Boson_Phi", "Boson_M", "Boson_Eta", "Boson_sumET", "Boson_daughter2", "Boson_daughter2",
+                                                            "Boson_Pt", "Boson_Phi", "Boson_M", "Boson_Eta", "Boson_sumET", "Boson_daughter1", "Boson_daughter2",
                                                             "nCombinations"
                                                                ) )
