@@ -69,13 +69,13 @@ metPlus MVAMET::calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt
     Recoil.setP4(MET->tauJetSpouriousComponents.p4() - MET->p4());
     Recoil.setSumEt(MET->sumEt());    
     // subtract Z-Boson if contained in MET to get recoil
-    if (!(MET->METFlag==2))
+    if ((MET->METFlag==0) || (MET->METFlag==1))
     {
       Recoil.setP4(Recoil.p4()-Z.p4());
       Recoil.setSumEt(Recoil.sumEt()-MET->sumEt_TauJetCharge-Z.sumEt_Leptons);    
     }
  
-    if (!(MET->METFlag==1))
+    if ((MET->METFlag==0) || (MET->METFlag==2))
     {
       Recoil.setSumEt(Recoil.sumEt()-MET->sumEt_TauJetNeutral);    
     }
@@ -278,6 +278,13 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
   {
     metPlus referenceRecoil;
     std::vector<int>::const_iterator itMETFlags = srcMETFlags_.begin();
+
+    // MET flags show what components have to be subtracted to get the recoil from the MET
+    // MET Flags: 0 -> Neutral + Charged PV
+    //            1 -> only charged PV
+    //            2 -> only Neutral PV
+    //            3 -> not included in MET
+    //
     int i = 0;
     for ( std::vector<edm::EDGetTokenT<pat::METCollection> >::const_iterator srcMET = srcMETs_.begin(); srcMET != srcMETs_.end() && itMETFlags!=srcMETFlags_.end(); ++srcMET, ++itMETFlags )
     {
