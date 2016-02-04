@@ -15,9 +15,9 @@ from JetMETCorrections.Type1MET.correctedMet_cff import pfMetT1
 
 def runMVAMET(process,
                  srcMuons =  "slimmedMuons", ## inputMuonCollection
-                 muonTypeID    = "Tight", ## type of muon ID to be applied                                                                                                   
+                 muonTypeID    = "Medium", ## type of muon ID to be applied                                                                                                   
                  typeIsoMuons  = "dBeta", ## isolation type to be used for muons                                                                                               
-                 relativeIsoCutMuons = 0.12,
+                 relativeIsoCutMuons = 0.25,
                  srcElectrons = "slimmedElectrons", 
                  #electronTypeID= "Tight", 
                  #electronID_map = 'egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight',
@@ -187,9 +187,7 @@ def runMVAMET(process,
                                                 srcMuons       = cms.InputTag(srcMuons+muonTypeID),
                                                 srcElectrons   = cms.InputTag("slimmedElectrons"),
                                                 weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
-                                                #srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
-                                                #srcLeptons  = cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"),
-                                                srcLeptons  = cms.VInputTag(srcMuons+muonTypeID),
+                                                srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
                                                 tausSignificance = cms.InputTag('tausSignificance', 'METCovariance'),
                                                 produceRecoils = cms.bool(False),
                                                 saveMap = cms.bool(True)
