@@ -85,12 +85,12 @@ class MVAMET : public edm::stream::EDProducer<> {
   const Float_t GetResponse(const GBRForest * Reader,std::vector<std::string> &variableNames );
 
   // to correctly create the map of regression input vriables
-  void addToMap(reco::Candidate::LorentzVector p4, double sumEt, const std::string &type);
-  void addToMap(reco::Candidate::LorentzVector p4, double sumEt, const std::string &type, const pat::MET &referenceMET, reco::METCovMatrix &covMatrix);
+  void addToMap(const reco::Candidate::LorentzVector p4, const double sumEt, const std::string &type);
+  void addToMap(const metPlus &recoil, const metPlus &referenceMET);
   void addToMap(recoilingBoson &Z);
 
 
-  void calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt, const pat::MET& );
+  metPlus calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt);
   void TagZ();
 private:
   void doCombinations(int offset, int k);

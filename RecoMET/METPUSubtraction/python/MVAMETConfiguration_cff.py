@@ -189,6 +189,5 @@ def runMVAMET(process,
                                                 weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
                                                 srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
                                                 tausSignificance = cms.InputTag('tausSignificance', 'METCovariance'),
-                                                produceRecoils = cms.bool(False),
                                                 saveMap = cms.bool(True)
                                                 ))
