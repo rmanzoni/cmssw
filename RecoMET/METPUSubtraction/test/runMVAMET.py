@@ -40,25 +40,21 @@ if not hasattr(process,"VersionedPhotonIdProducer"):
 process.jmfw_analyzers = cms.Sequence()
 process.p = cms.Path(process.jmfw_analyzers)
 
+process.genZEvent = cms.EDFilter("GenParticleSelector",
+    filter = cms.bool(True),
+    src = cms.InputTag("prunedGenParticles"),
+    cut = cms.string('abs(pdgId()) == 13 && fromHardProcessFinalState()'),
+#    stableOnly = cms.bool(True)
+)
+
+
 # configure MVA MET
 runMVAMET( process)
+
 
 ## set input files
 process.source = cms.Source("PoolSource")
 process.source.fileNames = cms.untracked.vstring(options.inputFile)
-## output name
-
-if options.saveMapForTraining:
-    process.p = cms.Path()
-    process.load('CommonTools.UtilAlgos.TFileService_cfi')
-    process.TFileService.fileName = cms.string('output.root')
-    process.TFileService.closeFileFast = cms.untracked.bool(True)
-    from RecoMET.METPUSubtraction.mapAnalyzer_cff import MAPAnalyzer
-    process.MAPAnalyzer = MAPAnalyzer
-    process.MVAMET.saveMap = cms.bool(True)
-    process.skimmvamet = cms.Sequence( process.MVAMET * process.MAPAnalyzer)
-    process.p *= (process.skimmvamet)
-
 ## logger
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 50
@@ -70,12 +66,24 @@ process.options.allowUnscheduled = cms.untracked.bool(True)
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
 ) 
-process.output = cms.OutputModule("PoolOutputModule",
+
+if options.saveMapForTraining:
+    process.p = cms.Path()
+    process.load('CommonTools.UtilAlgos.TFileService_cfi')
+    process.TFileService.fileName = cms.string('output.root')
+    process.TFileService.closeFileFast = cms.untracked.bool(True)
+    from RecoMET.METPUSubtraction.mapAnalyzer_cff import MAPAnalyzer
+    process.MAPAnalyzer = MAPAnalyzer
+    process.MVAMET.saveMap = cms.bool(True)
+    process.skimmvamet = cms.Sequence( process.genZEvent * process.MVAMET * process.MAPAnalyzer)
+    process.p *= (process.skimmvamet)
+
+else:
+  process.output = cms.OutputModule("PoolOutputModule",
                                       fileName = cms.untracked.string('output_particles.root'),
                                       outputCommands = cms.untracked.vstring(
                                                                              'keep *_*_*_MVAMET'
                                                                              ),        
                                       SelectEvents = cms.untracked.PSet(  SelectEvents = cms.vstring('p'))
                                       )
-    
-process.out = cms.EndPath(process.output)
+ process.out = cms.EndPath(process.output)
