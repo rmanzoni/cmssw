@@ -54,7 +54,12 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
 
 }
 
-MVAMET::~MVAMET(){}
+MVAMET::~MVAMET(){
+  delete mvaReaderPhiCorrection_;
+  delete mvaReaderRecoilCorrection_;
+  delete mvaReaderCovU1_;
+  delete mvaReaderCovU2_;
+}
 
 metPlus MVAMET::calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt)
 {
@@ -390,7 +395,6 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
       }
     }
   }
-
   evt.put(patMETCollection,"MVAMET");
 }
 
@@ -460,9 +464,9 @@ const GBRForest* MVAMET::loadMVAfromFile(const edm::FileInPath& inputFileName, s
   if ( inputFileName.location()==edm::FileInPath::Unknown ) 
     throw cms::Exception("PFMETAlgorithmMVA::loadMVA") << " Failed to find File = " << inputFileName << " !!\n";
   
-  TFile* inputFile = new TFile(inputFileName.fullPath().data());
+  std::unique_ptr<TFile> inputFile(new TFile(inputFileName.fullPath().data()));
   std::string variableListName = mvaName + "varlist";
-  std::vector<std::string> *lVec = (std::vector<std::string>*)inputFile->Get(variableListName.c_str());
+  std::unique_ptr<std::vector<std::string>> lVec ((std::vector<std::string>*)inputFile->Get(variableListName.c_str()));
 
   for(unsigned int i=0; i< lVec->size();++i)
   {
@@ -471,8 +475,6 @@ const GBRForest* MVAMET::loadMVAfromFile(const edm::FileInPath& inputFileName, s
   const GBRForest* mva = (GBRForest*)inputFile->Get(mvaName.data());
   if ( !mva )
     throw cms::Exception("PFMETAlgorithmMVA::loadMVA") << " Failed to load MVA from file = " << inputFileName.fullPath().data() << " !!\n";
-  
-  delete inputFile;
   
   return mva;
 }
