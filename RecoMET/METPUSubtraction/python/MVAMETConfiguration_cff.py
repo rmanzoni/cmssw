@@ -27,7 +27,7 @@ def runMVAMET(process,
                  tauTypeID = "Loose",
                  jetCollectionPF    = "slimmedJets",
                  dRCleaning= 0.3, 
-                 jetPtCut = 10, 
+                 jetPtCut = 15, 
                  jetEtaCut =5.,
                  saveMapForTraining = False
                  ):
