@@ -21,7 +21,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 process.GlobalTag.globaltag = options.globalTag
 
 if not hasattr(process,"egmGsfElectronIDs"):
-    electronIdModules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff',
+    electronIdModules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',
                          'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
 
     switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
@@ -77,7 +77,7 @@ if options.saveMapForTraining:
     from RecoMET.METPUSubtraction.mapAnalyzer_cff import MAPAnalyzer
     process.MAPAnalyzer = MAPAnalyzer
     process.MVAMET.saveMap = cms.bool(True)
-    process.MVAMET.srcLeptons  = cms.VInputTag("slimmedMuonsMedium")
+    #process.MVAMET.srcLeptons  = cms.VInputTag("slimmedMuonsMedium")
     process.skimmvamet = cms.Sequence( process.genZEvent * process.MVAMET * process.MAPAnalyzer)
     process.p *= (process.skimmvamet)
 

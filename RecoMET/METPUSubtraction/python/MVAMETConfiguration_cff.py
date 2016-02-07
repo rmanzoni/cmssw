@@ -15,12 +15,12 @@ from JetMETCorrections.Type1MET.correctedMet_cff import pfMetT1
 
 def runMVAMET(process,
                  srcMuons =  "slimmedMuons", ## inputMuonCollection
-                 muonTypeID    = "Medium", ## type of muon ID to be applied                                                                                                   
+                 muonTypeID    = "Tight", ## type of muon ID to be applied                                                                                                   
                  typeIsoMuons  = "dBeta", ## isolation type to be used for muons                                                                                               
-                 relativeIsoCutMuons = 0.25,
+                 relativeIsoCutMuons = 0.12,
                  srcElectrons = "slimmedElectrons", 
-                 #electronTypeID= "Tight", 
-                 #electronID_map = 'egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight',
+                 electronTypeID= "Tight", 
+                 electronID_map = 'egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight',
                  typeIsoElectrons = "rhoCorr",
                  relativeIsoCutEletrons = 0.12,
                  srcTaus = "slimmedTaus",
@@ -55,7 +55,6 @@ def runMVAMET(process,
 
 
     ### run Electron ID
-    """
     applyElectronID(process, 
                     label = electronTypeID, 
                     src   = srcElectrons,
@@ -66,14 +65,13 @@ def runMVAMET(process,
                     electron_id_map = electronID_map,
                     relativeIsolationCutVal = relativeIsoCutEletrons
                     )
-    """
 
     ### run tau ID                                        
     applyTauID( process, 
                 label = tauTypeID, 
                 src = srcTaus,
                 muonCollection     = srcMuons+muonTypeID,
-                electronCollection = "slimmedElectrons")
+                electronCollection = srcElectrons+electronTypeID)
 
     ## jet lepton cleaning
 
@@ -81,7 +79,7 @@ def runMVAMET(process,
                          label = "Cleaned",
                          jetCollection      = jetCollectionPF,
                          muonCollection     = srcMuons+muonTypeID,
-                         electronCollection = "slimmedElectrons",
+                         electronCollection = srcElectrons+electronTypeID,
                          tauCollection      = srcTaus+tauTypeID+"Cleaned",
                          jetPtCut   = jetPtCut,
                          jetEtaCut  = jetEtaCut,
@@ -150,7 +148,8 @@ def runMVAMET(process,
     patMETsForMVA.addGenMET = cms.bool(False)
     patMETsForMVA.srcJets = cms.InputTag(jetCollectionPF)
     #patMETsForMVA.srcLeptons = cms.InputTag("selectedPatJetsAK4PF")
-    setattr(patMETsForMVA,"srcLeptons", cms.VInputTag("slimmedElectrons", "slimmedMuons", "slimmedTaus"))
+    #setattr(patMETsForMVA,"srcLeptons", cms.VInputTag("slimmedElectrons", "slimmedMuons", "slimmedTaus"))
+    setattr(patMETsForMVA,"srcLeptons", cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"))
 
     for met in ["pfMET", "pfTrackMET", "pfNoPUMET", "pfPUCorrectedMET", "pfPUMET", "pfChargedPUMET", "pfNeutralPUMET", "pfNeutralPVMET", "pfNeutralUnclusteredMET"]:
         setattr(process, met, pfMet.clone())
@@ -184,9 +183,10 @@ def runMVAMET(process,
                                                 srcVertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                                 srcTaus        = cms.InputTag(srcTaus+tauTypeID+"Cleaned"),
                                                 srcMuons       = cms.InputTag(srcMuons+muonTypeID),
-                                                srcElectrons   = cms.InputTag("slimmedElectrons"),
+                                                #srcElectrons   = cms.InputTag("slimmedElectrons"),
                                                 weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
-                                                srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
+                                                #srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
+                                                srcLeptons  = cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"), # to produce all possible combinations
                                                 tausSignificance = cms.InputTag('tausSignificance', 'METCovariance'),
                                                 saveMap = cms.bool(True)
                                                 ))
