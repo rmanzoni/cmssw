@@ -26,7 +26,7 @@ int main(int argc, char* argv[] ) {
     //mauell
     std::string filename1 = argv[2];
     TFile *inputFile1 = TFile::Open(filename1.c_str());
-    TTree *inputTree1 = (TTree*)(inputFile1->Get("PUPPET/t"));
+    TTree *inputTree1 = (TTree*)(inputFile1->Get("MAPAnalyzer/t"));
     
     applyTraining *phi = new applyTraining("PhiCorrectedRecoil", "recoilPFMet", "PhiCorection_PUPPI.root", 1, inputTree1, filename1);
     phi->getResults();
@@ -68,10 +68,11 @@ int main(int argc, char* argv[] ) {
   std::string weightfilename = pt.get<std::string>("weightfilename");
 
   TFile *inputFile = TFile::Open(inputFilename.c_str());
-  TTree *inputTree = (TTree*)(inputFile->Get("PUPPET/t"));
+  TTree *inputTree = (TTree*)(inputFile->Get("MAPAnalyzer/t"));
 
   std::cout << "input tree: " << inputTree << std::endl;
   std::cout << "This many: " << trainingProperties.size() << std::endl;
+  std::string lastName;
   for(size_t iTrain = 0; iTrain < trainingProperties.size(); ++iTrain)
   {
     //applyTraining *user = new applyTraining(trainingProperties[iTrain], inputTree);
@@ -81,15 +82,34 @@ int main(int argc, char* argv[] ) {
       std::string friendName = v.second.data();
       inputTree->AddFriend("t", (friendName + ".root").c_str());
     }
+    if(trainingProperties[iTrain].get<int>("mode") == 0)
+    {
+    if(iTrain>0)
+    {
+      inputFile = TFile::Open((lastName+".root").c_str());
+      inputTree = (TTree*)(inputFile->Get("t"));
+    }
+    lastName =  trainingProperties[iTrain].get<std::string>("name");
+    applyTraining *user = new applyTraining(trainingProperties[iTrain].get<std::string>("name"), 
+                                            trainingProperties[iTrain].get<std::string>("apply_MVA_to"),
+                                            weightfilename,
+       //                                     trainingProperties[iTrain].get<int>("mode"),
+                                            inputTree,
+                                            inputFilename);
+    user->getResults();
+    delete user;
+    }else 
+    {
     applyTraining *user = new applyTraining(trainingProperties[iTrain].get<std::string>("name"), 
                                             trainingProperties[iTrain].get<std::string>("apply_MVA_to"),
                                             weightfilename,
                                             trainingProperties[iTrain].get<int>("mode"),
                                             inputTree,
                                             inputFilename);
-    std::cout << "Initialized." << std::endl;
     user->getResults();
     delete user;
+    }
+    std::cout << "Initialized." << std::endl;
   }
 }
 

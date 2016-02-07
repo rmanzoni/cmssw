@@ -452,7 +452,7 @@ unsigned int MVAMET::countJets(const pat::JetCollection& jets, const float maxPt
 
 const Float_t MVAMET::GetResponse(const GBRForest * Reader, std::vector<std::string> &variableNames ){
 
-  Float_t * mvaInputVector = createFloatVector(variableNames);
+  Float_t* mvaInputVector = createFloatVector(variableNames);
   double result = Reader->GetResponse(mvaInputVector);
   delete mvaInputVector;
   return result;

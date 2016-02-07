@@ -1,4 +1,19 @@
 #include "../interface/applyphi.h"
+applyTraining::applyTraining(std::string name, std::string apply_MVA_to, std::string weightfilename, TTree *inputTree, std::string input_filename) :
+  _mode(0),
+  _applyMVAto(apply_MVA_to),
+  _mvaResponseName(name),
+  // Forest
+  //inputs
+  _lTree(inputTree),
+  _lNEvents(_lTree->GetEntries()),
+  //outputs
+  _outputFilename(_mvaResponseName + ".root"),
+  _lOFile(new TFile( _outputFilename.c_str(),"RECREATE"))
+{
+  std::cout << "new constructur" << std::endl;
+  _lOTree = _lTree->CloneTree(0);
+}
 applyTraining::applyTraining(std::string name, std::string apply_MVA_to, std::string weightfilename, int mode, TTree *inputTree, std::string input_filename) :
   _mode(mode),
   _iTrain(weightfilename),
@@ -120,10 +135,13 @@ void applyTraining::eventLoop()
     {
       if (i0 % 200000 == 0) std::cout << "--- ... Processing event: " << double(i0)/double(_lNEvents) << std::endl;
       _lTree->GetEntry(i0);
+    if(_mode!=0)
+    {
       for(int i1 = 0; i1 < _lN; i1++)
       { 
         _lVals[i1] = _lFVars[i1]->EvalInstance();
       }
+    }
     _mvaResponse = (_mode>0) ? float(_lForest->GetResponse(_lVals)) : 0;
   //do additional calculations
     _z.SetPtEtaPhiM(_z_pT, 0, _z_Phi,0);

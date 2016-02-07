@@ -26,6 +26,7 @@ class applyTraining {
     applyTraining(std::string name, std::string apply_MVA_to, std::string weightfilename, int mode, TTree *inputTree, std::string input_filename);
     applyTraining(boost::property_tree::ptree &pt, TTree *inputTree);
     applyTraining(boost::property_tree::ptree &pt, TTree *inputTree, std::string &friendFilename, std::string &friendTreename);
+    applyTraining(std::string name, std::string apply_MVA_to, std::string weightfilename, TTree *inputTree, std::string input_filename);
     void registerUpdatedFourVector();
     void registerUpdatedMET();
     void registerUpdatedCovMatrix();
