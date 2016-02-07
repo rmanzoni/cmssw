@@ -88,6 +88,7 @@ class MVAMET : public edm::stream::EDProducer<> {
   void addToMap(const reco::Candidate::LorentzVector p4, const double sumEt, const std::string &type);
   void addToMap(const metPlus &recoil, const metPlus &referenceMET);
   void addToMap(recoilingBoson &Z);
+  void addToMap(const metPlus &recoil, const recoilingBoson &Z);
 
 
   metPlus calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt);

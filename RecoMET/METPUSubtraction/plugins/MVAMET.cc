@@ -326,6 +326,8 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
         referenceRecoil = Recoil;
       }
       addToMap(Recoil, referenceRecoil);
+      if(saveMap_)
+        addToMap(Recoil, Z);
       ++i;
     }
 
@@ -391,6 +393,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
       if(bestMass_ == Z.dZMass())
       {
         addToMap(Z);
+        var_["select"] = Z.p4().M() > 80 && Z.p4().M() < 100 && Z.isDiMuon() && combinations_.size()==1;
         saveMap(evt);
       }
     }
@@ -409,6 +412,16 @@ void MVAMET::saveMap(edm::Event& evt)
 
   evt.put(variableNames);
   evt.put(variables);
+
+}
+void MVAMET::addToMap(const metPlus &recoil, const recoilingBoson &Z)
+{
+  TVector2 diLeptonMomentum(Z.p4().X(), Z.p4().Y());
+  TVector2 recoilT2(recoil.p4().X(), recoil.p4().Y());
+  TVector2 rotatedRecoil = recoilT2.Rotate(- diLeptonMomentum.Phi());
+  auto type = "recoil" + recoil.collection_name;
+  var_[type + "_LongZ" ] = rotatedRecoil.X();
+  var_[type + "_PerpZ" ] = rotatedRecoil.Y();
 
 }
 
