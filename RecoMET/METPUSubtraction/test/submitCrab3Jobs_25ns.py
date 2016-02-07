@@ -38,7 +38,6 @@ config.JobType.inputFiles = ['../data/weightfile.root']
 config.JobType.allowUndistributedCMSSW = True
 
 config.section_('Data')
-config.Data.unitsPerJob = 1
 config.Data.inputDBS  = 'global' #'http://cmsdbsprod.cern.ch/cms_dbs_prod_global/servlet/DBSServlet'
 config.Data.splitting = 'EventAwareLumiBased'
 config.Data.unitsPerJob = 50000
