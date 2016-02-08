@@ -393,7 +393,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
       if(bestMass_ == Z.dZMass())
       {
         addToMap(Z);
-        var_["select"] = Z.p4().M() > 80 && Z.p4().M() < 100 && Z.isDiMuon() && combinations_.size()==1;
+        var_["select"] = Z.p4().M() > 80 && Z.p4().M() < 100 && Z.isDiMuon();
         saveMap(evt);
       }
     }
