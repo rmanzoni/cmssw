@@ -196,6 +196,7 @@ void MVAMET::calculateRecoilingObjects(edm::Event &evt, const pat::MuonCollectio
       Z.pdgIds.push_back(lepton->pdgId());
       handleMuons( lepton, Z, muCollection);
       handleTaus( lepton, Z, tauCollection);
+      Z.leptons.push_back(lepton);
     }
     Bosons_.push_back(Z);
   } 
