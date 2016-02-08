@@ -1,7 +1,7 @@
 { 
 	"activeTrainings" : ["phiTraining", "recoilTraining", "CovU1", "CovU2", "CovApply"],
 		"activeReweightings" : ["flattenpT"],
-		"inputFile": "DY.root",
+		"inputFile": "All.root",
 		"Folder" : "MAPAnalyzer/t",
 		"weightfilename" : "weightfile.root",
 		"flattenpT" :
@@ -26,7 +26,7 @@
 			"minEvents" : 250,
 			"shrinkage" : 0.05,
 			"minCutSignificance" : 2.0,
-			"nTrees" : 3,
+			"nTrees" : 1000,
 			"targetVariable" : "(Boson_Phi-recoilslimmedMETs_Phi+TMath::Pi()) - 2.*TMath::Pi()*((Boson_Phi-recoilslimmedMETs_Phi) > 0)",
 			"trainingVariables" : 
 				[	
@@ -63,7 +63,7 @@
 			"minEvents" : 250,
 			"shrinkage" : 0.05,
 			"minCutSignificance" : 3.0,
-			"nTrees" : 3,
+			"nTrees" : 1000,
 			"targetVariable" : "-Boson_Pt/PhiCorrectedRecoil_LongZ",
 			"trainingVariables" : 
 				[	
@@ -102,7 +102,7 @@
 			"shrinkage" : 0.05,
 			"minCutSignificance" : 3.0,
 			"targetVariable" : "std::abs(Boson_Pt*cos(Boson_Phi-LongZCorrectedRecoil_LongZ)-LongZCorrectedRecoil_Pt)/LongZCorrectedRecoil_Pt*sqrt(TMath::Pi()/2.)",
-			"nTrees" : 3,
+			"nTrees" : 1000,
 			"trainingVariables" : 
 				[	
 				"LongZCorrectedRecoil_Phi",
@@ -140,7 +140,7 @@
 			"minEvents" : 250,
 			"shrinkage" : 0.05,
 			"minCutSignificance" : 3.0,
-			"nTrees" : 3,
+			"nTrees" : 1000,
 			"targetVariable" : "abs(Boson_Pt*sin(Boson_Phi-LongZCorrectedRecoil_Phi))*sqrt(TMath::Pi()/2.)/LongZCorrectedRecoil_Pt",
 			"trainingVariables" : 
 				[	
