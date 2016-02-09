@@ -4,11 +4,13 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 MVAMET::MVAMET(const edm::ParameterSet& cfg){
-  produces<std::vector<std::string>>();
-  produces<std::vector<Float_t>>();
 
   saveMap_ = cfg.getParameter<bool>("saveMap");
-
+  if(saveMap_)
+  {
+    produces<std::vector<std::string>>();
+    produces<std::vector<Float_t>>();
+  }
   // get tokens for input METs and prepare for saving the corresponding recoils to the event
   srcMETTags_   = cfg.getParameter<vInputTag>("srcMETs");
   for(vInputTag::const_iterator it=srcMETTags_.begin();it!=srcMETTags_.end();it++) {
