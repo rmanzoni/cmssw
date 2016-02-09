@@ -33,6 +33,7 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
   debug_ = (cfg.existsAs<bool>("debug")) ? cfg.getParameter<bool>("debug") : false;
   combineNLeptons_ = cfg.getParameter<int>("combineNLeptons");
   requireOS_ = cfg.getParameter<bool>("requireOS");
+  useTauSig_    = cfg.getParameter<bool>("useTauSig");
 
   srcVertices_  = consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("srcVertices"));
   srcJets_      = consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("srcJets"));
