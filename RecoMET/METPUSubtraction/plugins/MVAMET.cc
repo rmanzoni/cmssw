@@ -408,7 +408,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
       }
     }
   }
-  evt.put(patMETCollection,"MVAMET");
+  evt.put(patMETCollection,mvaMETLabel_);
 }
 
 void MVAMET::saveMap(edm::Event& evt)
