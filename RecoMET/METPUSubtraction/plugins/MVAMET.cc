@@ -36,7 +36,8 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
   srcJets_      = consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("srcJets"));
   srcTaus_      = consumes<pat::TauCollection>(cfg.getParameter<edm::InputTag>("srcTaus"));
   srcMuons_     = consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("srcMuons"));
-  srcTausSignificance_ = consumes<math::Error<2>::type>(cfg.getParameter<edm::InputTag>("tausSignificance"));
+  if(useTauSig_)
+    srcTausSignificance_ = consumes<math::Error<2>::type>(cfg.getParameter<edm::InputTag>("tausSignificance"));
 
 
   // load weight files
@@ -252,12 +253,15 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
 
   // read in additional taus significance contribution
   edm::Handle<math::Error<2>::type> tausSignificance;
-  evt.getByToken(srcTausSignificance_, tausSignificance);
   reco::METCovMatrix tausMatrix; 
-  tausMatrix(0,0) = (*tausSignificance)(0,0);
-  tausMatrix(1,0) = (*tausSignificance)(1,0);
-  tausMatrix(0,1) = (*tausSignificance)(0,1);
-  tausMatrix(1,1) = (*tausSignificance)(1,1);
+  if(useTauSig_)
+  {
+    evt.getByToken(srcTausSignificance_, tausSignificance);
+    tausMatrix(0,0) = (*tausSignificance)(0,0);
+    tausMatrix(1,0) = (*tausSignificance)(1,0);
+    tausMatrix(0,1) = (*tausSignificance)(0,1);
+    tausMatrix(1,1) = (*tausSignificance)(1,1);
+  }
 
   //fill allLeptons_
   calculateRecoilingObjects(evt, muCollection, tauCollection);
@@ -371,7 +375,12 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
     mvaMETCov(0, 1) = -std::pow(CovU1, 2) * sinPhi*cosPhi + std::pow(CovU2, 2) * sinPhi*cosPhi;
     mvaMETCov(1, 0) =  mvaMETCov(0, 1);
     mvaMETCov(1, 1) =  std::pow(CovU1, 2) * sinPhi*sinPhi + std::pow(CovU2, 2) * cosPhi*cosPhi;
-    mvaMET.setSignificanceMatrix(mvaMETCov + tausMatrix);
+
+    if(useTauSig_)
+      mvaMET.setSignificanceMatrix(mvaMETCov + tausMatrix);
+    else
+      mvaMET.setSignificanceMatrix(mvaMETCov);
+     
 
     // add constituent info to pat::MET
     size_t iCount=0;

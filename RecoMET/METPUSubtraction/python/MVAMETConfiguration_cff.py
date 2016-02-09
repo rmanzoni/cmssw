@@ -147,8 +147,7 @@ def runMVAMET(process,
     patMETsForMVA.computeMETSignificance = cms.bool(True)
     patMETsForMVA.addGenMET = cms.bool(False)
     patMETsForMVA.srcJets = cms.InputTag(jetCollectionPF)
-    #patMETsForMVA.srcLeptons = cms.InputTag("selectedPatJetsAK4PF")
-    #setattr(patMETsForMVA,"srcLeptons", cms.VInputTag("slimmedElectrons", "slimmedMuons", "slimmedTaus"))
+
     setattr(patMETsForMVA,"srcLeptons", cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"))
 
     for met in ["pfMET", "pfTrackMET", "pfNoPUMET", "pfPUCorrectedMET", "pfPUMET", "pfChargedPUMET", "pfNeutralPUMET", "pfNeutralPVMET", "pfNeutralUnclusteredMET"]:
@@ -183,10 +182,10 @@ def runMVAMET(process,
                                                 srcVertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                                 srcTaus        = cms.InputTag(srcTaus+tauTypeID+"Cleaned"),
                                                 srcMuons       = cms.InputTag(srcMuons+muonTypeID),
-                                                #srcElectrons   = cms.InputTag("slimmedElectrons"),
                                                 weightFile     = cms.FileInPath('RecoMET/METPUSubtraction/data/weightfile.root'),
                                                 #srcLeptons  = cms.VInputTag("slimmedMuons", "slimmedElectrons", "slimmedTaus"), # to produce all possible combinations
-                                                srcLeptons  = cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"), # to produce all possible combinations
+                                                srcLeptons  = cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"), # to produce a selection specifically designed for trainings
+                                                useTauSig = cms.bool(True),
                                                 tausSignificance = cms.InputTag('tausSignificance', 'METCovariance'),
-                                                saveMap = cms.bool(True)
+                                                saveMap = cms.bool(False)
                                                 ))

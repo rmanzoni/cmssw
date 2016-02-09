@@ -43,8 +43,6 @@ process.p = cms.Path(process.jmfw_analyzers)
 process.genZEvent = cms.EDFilter("GenParticleSelector",
     filter = cms.bool(True),
     src = cms.InputTag("prunedGenParticles"),
-    #cut = cms.string('isPromptDecayed() && abs(pdgId()) == 13'),
-    #cut = cms.string('!isPromptDecayed()'),
     cut = cms.string('abs(pdgId()) == 13 && !isDirectPromptTauDecayProductFinalState()'),
     stableOnly = cms.bool(False)
 )
@@ -77,7 +75,6 @@ if options.saveMapForTraining:
     from RecoMET.METPUSubtraction.mapAnalyzer_cff import MAPAnalyzer
     process.MAPAnalyzer = MAPAnalyzer
     process.MVAMET.saveMap = cms.bool(True)
-    #process.MVAMET.srcLeptons  = cms.VInputTag("slimmedMuonsMedium")
     process.skimmvamet = cms.Sequence( process.genZEvent * process.MVAMET * process.MAPAnalyzer)
     process.p *= (process.skimmvamet)
 
