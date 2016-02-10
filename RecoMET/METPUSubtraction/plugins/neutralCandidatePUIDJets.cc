@@ -227,9 +227,10 @@ void neutralCandidatePUIDJets::produce(edm::Event& iEvent, const edm::EventSetup
     if(!clustered)
     {
       neutralParticlesUnclustered->push_back(edm::Ptr<reco::Candidate>(candCollection, indexColl));
-      indexColl++;
     }
+    indexColl++;
   }
+
   
   iEvent.put(neutralParticlesPVJets,neutralParticlesPVJets_);
   iEvent.put(neutralParticlesPUJets,neutralParticlesPUJets_);
