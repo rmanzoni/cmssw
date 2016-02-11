@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 metstrings = []
 postfixes = [ "Cov00", "Cov11", "Phi", "dPhi", "Pt", "sumEt", "sumEtFraction", "PerpZ", "LongZ"]
-for met in ["patpfMET", "patpfTrackMET", "patpfNoPUMET", "patpfNoPUMETT1", "patpfPUCorrectedMET", "patpfPUMET", "patpfChargedPUMET", "patpfNeutralPUMET", "patpfNeutralPVMET", "patpfNeutralUnclusteredMET", "slimmedMETs", "slimmedMETsPuppi"]:
+for met in ["patpfMET", "patpfMETT1", "patpfTrackMET", "patpfTrackMETT1", "patpfNoPUMET", "patpfNoPUMETT1", "patpfPUCorrectedMET", "patpfPUCorrectedMET", "patpfPUMET", "patpfPUMETT1", "patpfChargedPUMET", "patpfNeutralPUMET", "patpfNeutralPVMET", "patpfNeutralUnclusteredMET", "slimmedMETs", "slimmedMETsPuppi"]:
   for postfix in postfixes:
     metstrings.append("recoil" + met + "_" + postfix)
 
