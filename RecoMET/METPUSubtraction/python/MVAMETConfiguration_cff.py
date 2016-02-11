@@ -89,6 +89,10 @@ def runMVAMET(process,
 
     #### Input definitions like in classic MVA MET
     #### tracks from PV
+    process.pfCHS = cms.EDFilter("CandPtrSelector",
+                                       cut = cms.string('fromPV'),
+                                       src = cms.InputTag("packedPFCandidates")
+                                       )
     process.pfChargedPV = cms.EDFilter("CandPtrSelector",
                                        cut = cms.string('fromPV && charge !=0'),
                                        src = cms.InputTag("packedPFCandidates")
@@ -150,13 +154,50 @@ def runMVAMET(process,
 
     setattr(patMETsForMVA,"srcLeptons", cms.VInputTag(srcMuons+muonTypeID,srcElectrons+electronTypeID,srcTaus+tauTypeID+"Cleaned"))
 
+    # get jets for T1 Correction
+    process.corrPfMetType1 = corrPfMetType1
+    process.corrPfMetType1.src = cms.InputTag("ak4PFJetsCHS")
+    from RecoJets.JetProducers.ak4PFJets_cfi import ak4PFJets
+    process.ak4PFJetsCHS = ak4PFJets.clone()
+    process.ak4PFJetsCHS.src = cms.InputTag('pfCHS')
+    from JetMETCorrections.Configuration.JetCorrectors_cff import ak4PFCHSL1FastL2L3Corrector,ak4PFCHSL3AbsoluteCorrector,ak4PFCHSL2RelativeCorrector,ak4PFCHSL1FastjetCorrector
+    process.ak4PFCHSL1FastL2L3Corrector = ak4PFCHSL1FastL2L3Corrector
+    process.ak4PFCHSL3AbsoluteCorrector = ak4PFCHSL3AbsoluteCorrector
+    process.ak4PFCHSL2RelativeCorrector = ak4PFCHSL2RelativeCorrector
+    process.ak4PFCHSL1FastjetCorrector = ak4PFCHSL1FastjetCorrector 
+
+    # custom T1 correction for PU MET
+    process.ak4PUJets = ak4PFJets.clone()
+    process.ak4PUJets.src = cms.InputTag('pfPUMETCands')
+    process.corrPUMETType1 = corrPFMetTyp1.clone()
+    process.corrPUMETType1.src = cms.InputTag("ak4PUJets")
+
+
     for met in ["pfMET", "pfTrackMET", "pfNoPUMET", "pfPUCorrectedMET", "pfPUMET", "pfChargedPUMET", "pfNeutralPUMET", "pfNeutralPVMET", "pfNeutralUnclusteredMET"]:
+        # create PF METs
         setattr(process, met, pfMet.clone())
         setattr(getattr(process, met), "src", cms.InputTag(met+"Cands"))
         setattr(getattr(process, met), "alias", cms.string(met))
+        # derive corrections and apply them
+#        setattr(process, "corr"+met, corrPfMetType1.clone())
+        setattr(process, met+"T1", pfMetT1.clone())
+        #setattr(getattr(process, met+"T1"), "srcCorrections", cms.VInputTag( "corr"+met, "type1"))
+        setattr(getattr(process, met+"T1"), "src", cms.InputTag( met))
+
+        # convert METs to pat objects
         setattr(process, "pat"+met, patMETsForMVA.clone())
         setattr(getattr(process, "pat"+met), "metSource", cms.InputTag(met))
 
+        setattr(process, "pat"+met+"T1", patMETsForMVA.clone())
+        setattr(getattr(process, "pat"+met+"T1"), "metSource", cms.InputTag(met+"T1"))
+
+    process.pfPUMETT1.srcCorrections = cms.InputTag("corrPUMETType1")
+
+    #T1 corrections
+  #  process.corrpfMET.src = cms.InputTag("slimmedJets")
+  #  process.corrpfNoPUMET.src = cms.InputTag("neutralInJets", "PVJets")
+  #  process.corrpfPUCorrectedMET.src = cms.InputTag("neutralInJets", "PVJets")
+  #  process.corrpfPUMET.src = cms.InputTag("neutralInJets", "PUJets")
 
     ### MVA MET
     setattr(process,"MVAMET", cms.EDProducer("MVAMET",                                                
@@ -169,6 +210,7 @@ def runMVAMET(process,
                                                                              cms.InputTag("patpfMET"),
                                                                              cms.InputTag("patpfTrackMET"),
                                                                              cms.InputTag("patpfNoPUMET"),
+                                                                             cms.InputTag("patpfNoPUMETT1"),
                                                                              cms.InputTag("patpfPUCorrectedMET"),
                                                                              cms.InputTag("patpfPUMET"),
                                                                              cms.InputTag("slimmedMETsPuppi"),
@@ -177,7 +219,7 @@ def runMVAMET(process,
                                                                              cms.InputTag("patpfNeutralPVMET"),
                                                                              cms.InputTag("patpfNeutralUnclusteredMET")
                                                                             ),
-                                                inputMETFlags = cms.vint32(0,0,1,0,0,3,0,3,3,2,3),
+                                                inputMETFlags = cms.vint32(0,0,1,0,0,0,3,0,3,3,2,3),
                                                 srcJets        = cms.InputTag(jetCollectionPF+"Cleaned"),
                                                 srcVertices    = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                                 srcTaus        = cms.InputTag(srcTaus+tauTypeID+"Cleaned"),

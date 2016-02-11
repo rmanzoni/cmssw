@@ -33,6 +33,8 @@ class neutralCandidatePUIDJets : public edm::stream::EDProducer<> {
   std::string   neutralParticlesPVJets_ ;
   std::string   neutralParticlesPUJets_ ;
   std::string   neutralParticlesUnclustered_ ;
+  std::string   PUJets_;
+  std::string   PVJets_;
   std::string   jetPUIDWP_;
 
   std::string   jetPUIDMapLabel_ ;
@@ -94,6 +96,9 @@ neutralCandidatePUIDJets::neutralCandidatePUIDJets(const edm::ParameterSet& iCon
   else
     neutralParticlesUnclustered_ = "neutralParticlesUnclustered";
 
+  PUJets_ = "PUJets";
+  PVJets_ = "PVJets";
+
   if(iConfig.existsAs<std::string >("jetPUDIWP")){
     jetPUIDWP_ = iConfig.getParameter<std::string>("jetPUDIWP");
     if(jetPUIDWP_ != "tight" and jetPUIDWP_ != "medium" and jetPUIDWP_ != "loose" and jetPUIDWP_ != "user")
@@ -119,6 +124,8 @@ neutralCandidatePUIDJets::neutralCandidatePUIDJets(const edm::ParameterSet& iCon
   produces<edm::PtrVector<reco::Candidate> >(neutralParticlesPVJets_);
   produces<edm::PtrVector<reco::Candidate> >(neutralParticlesPUJets_);
   produces<edm::PtrVector<reco::Candidate> >(neutralParticlesUnclustered_);
+  produces<pat::JetCollection>(PUJets_);
+  produces<pat::JetCollection>(PVJets_);
 
 }
 
@@ -134,6 +141,8 @@ void neutralCandidatePUIDJets::produce(edm::Event& iEvent, const edm::EventSetup
   std::auto_ptr<edm::PtrVector<reco::Candidate> > neutralParticlesPUJets(new edm::PtrVector<reco::Candidate>);
   std::auto_ptr<edm::PtrVector<reco::Candidate> > neutralParticlesUnclustered(new edm::PtrVector<reco::Candidate>);
 
+  std::auto_ptr<pat::JetCollection> PUJets(new pat::JetCollection);
+  std::auto_ptr<pat::JetCollection> PVJets(new pat::JetCollection);
 
   // loop on jets
   for(auto jet : *jetCollection){
@@ -188,6 +197,10 @@ void neutralCandidatePUIDJets::produce(edm::Event& iEvent, const edm::EventSetup
       isPassingPUID = jet.userFloat(jetPUIDNameLabel_) > jetPUIDCut_[ptBin][etaBin] ? true : false ;
 
     }
+    if(isPassingPUID)
+      PVJets->push_back(jet);
+    else
+      PUJets->push_back(jet);
     // loop on constituents
     for( auto particle : jet.getJetConstituents())
     {
@@ -235,6 +248,8 @@ void neutralCandidatePUIDJets::produce(edm::Event& iEvent, const edm::EventSetup
   iEvent.put(neutralParticlesPVJets,neutralParticlesPVJets_);
   iEvent.put(neutralParticlesPUJets,neutralParticlesPUJets_);
   iEvent.put(neutralParticlesUnclustered,neutralParticlesUnclustered_);
+  iEvent.put(PUJets,PUJets_);
+  iEvent.put(PVJets,PVJets_);
 
 }
 
