@@ -18,7 +18,8 @@ datasets = {
 #  "DYJetsToLLM50HT-200to400" : "/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM",
 #  "DYJetsToLLM50HT-400to600" : "/DYJetsToLL_M-50_HT-400to600_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM",
 #  "DYJetsToLLM50HT-600toInf" : "/DYJetsToLL_M-50_HT-600toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM",
-  "DYJetsToLLM50" : "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM"
+  "DYJetsToLLM50" : "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM",
+  "DYJetsToLLM50NLO" : "/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/MINIAODSIM"
 }
 
 import sys
@@ -47,8 +48,8 @@ config.Data.publication = False
 config.section_('User')
 config.section_('Site')
 config.Site.storageSite = 'T2_DE_DESY'
-config.Data.outLFNDirBase = '/store/user/rfriese/mvamet/skimming/2016-02-03/'
-config.General.workArea = '/nfs/dust/cms/user/rfriese/crab_mvamet_skim-2016-02-03'
+config.Data.outLFNDirBase = '/store/user/rfriese/mvamet/skimming/2016-02-11/'
+config.General.workArea = '/nfs/dust/cms/user/rfriese/crab_mvamet_skim-2016-02-11'
 config.JobType.pyCfgParams = ["saveMapForTraining=True",'globalTag=76X_mcRun2_asymptotic_v12']
 
 for nick, sample in datasets.iteritems():
