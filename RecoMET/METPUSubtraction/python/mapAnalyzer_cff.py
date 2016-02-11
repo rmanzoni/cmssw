@@ -6,6 +6,7 @@ for met in ["patpfMET", "patpfMETT1", "patpfTrackMET", "patpfTrackMETT1", "patpf
     metstrings.append("recoil" + met + "_" + postfix)
 
 metstrings.extend([ 
+                 "weight",
                  "select",
                  "Jet0_Eta",
                  "Jet0_M",
@@ -30,4 +31,6 @@ metstrings.extend([
 MAPAnalyzer =cms.EDAnalyzer('MAPAnalyzer',
                            srcVariables = cms.InputTag("MVAMET"),
                            srcVariableNames = cms.InputTag("MVAMET"),
-                           variableNamesToSave = cms.vstring( metstrings ))
+                           variableNamesToSave = cms.vstring( metstrings ),
+                           srcGenEvent = cms.InputTag("generator")
+                           )
