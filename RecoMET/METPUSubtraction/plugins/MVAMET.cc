@@ -230,14 +230,16 @@ void MVAMET::fillEventInformation(edm::Event& evt)
 
 void MVAMET::TagZ()
 {
-  // method used to selection di-muon combination closest to Z-Mass
-  bestMass_ = 10000;
-  for(auto Z: Bosons_)
+  if(Bosons_.size() == 0)
+   return;
+  
+  std::vector<recoilingBoson>::iterator taggedBoson = Bosons_.begin(); 
+  for(std::vector<recoilingBoson>::iterator Z= Bosons_.begin(); Z != Bosons_.end(); Z++)
   {
-    float tmpMass = Z.dZMass();
-    if(tmpMass < bestMass_)
-      bestMass_ = tmpMass;
+    if(taggedBoson->p4().pt() < Z->p4().pt())
+      taggedBoson = Z;
   }
+  taggedBoson->setTagged();
 }
 
 void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
@@ -403,10 +405,10 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
    }
     if(saveMap_)
     {
-      if(bestMass_ == Z.dZMass())
+      if(Z.tag)
       {
         addToMap(Z);
-        var_["select"] = Z.p4().M() > 80 && Z.p4().M() < 100 && Z.isDiMuon();
+        var_["select"] = Z.select();
         saveMap(evt);
       }
     }

@@ -47,8 +47,8 @@ class recoilingBoson : public reco::Particle {
   recoilingBoson()
   {
     sumEt_Leptons = 0;
+    tag = false;
   }
-  float dZMass() { return std::abs(91.0 - p4().M()); }
   std::vector<reco::CandidatePtr> chargedTauJetCandidates;
   std::vector<reco::CandidatePtr> neutralTauJetCandidates;
   float sumEt_Leptons;
@@ -61,6 +61,12 @@ class recoilingBoson : public reco::Particle {
     else
       return false;
   }
+  bool select()
+  {
+        return this->p4().M() > 80 && this->p4().M() < 100 && this->isDiMuon();
+  }
+  bool tag;
+  void setTagged() { this->tag = true; } 
 };
 
 class MVAMET : public edm::stream::EDProducer<> {
