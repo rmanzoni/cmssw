@@ -1,5 +1,7 @@
 <export>
   <lib   name="1"/>
+  <use name="root" />
+  <use name="boost" />
 </export>
 <!-- uncomment the following line to to fast trainings -->
 <!-- <flags   CXXFLAGS="-O3 -ftree-loop-linear -floop-interchange -mmmx  -msse  -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -msse4 -march=corei7 -fopenmp"/> -->
@@ -40,3 +42,10 @@
 <use   name="rootmath"/>
 <use   name="rootrflx"/>
 <use name="rootgraphics"/>
+
+
+<use name="boost" />
+
+<Flags CPPDEFINES="FROM_CMSSW=1" />
+<Flags CPPDEFINES="PWD=$(PWD)" />
+
