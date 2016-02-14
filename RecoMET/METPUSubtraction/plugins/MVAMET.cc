@@ -273,20 +273,21 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
 
   //fill event meta information
   fillEventInformation(evt);
+  // create output collections
+  std::auto_ptr<pat::METCollection> recoilpatMETCollection(new pat::METCollection());
+  std::auto_ptr<pat::METCollection> patMETCollection(new pat::METCollection());
 
   // stop execution if no recoiling object has been found
   if(Bosons_.size() == 0)
   {
     if(saveMap_)
       saveMap(evt);
+    evt.put(patMETCollection,mvaMETLabel_);
     return;
   }
 
   if(saveMap_)
     TagZ();
-  // create output collections
-  std::auto_ptr<pat::METCollection> recoilpatMETCollection(new pat::METCollection());
-  std::auto_ptr<pat::METCollection> patMETCollection(new pat::METCollection());
 
   // loop on identified combinations of recoiling objects, here donted as "Z" 
   for(auto Z: Bosons_)
@@ -412,15 +413,6 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
         saveMap(evt);
       }
     }
-  }
-  // fallback: if no valid lepton combination has been identified, fall back to reference MET
-  if(patMETCollection->empty())
-  {
-      //std::vector<edm::EDGetTokenT<pat::METCollection> >::const_iterator srcMET = srcMETs_.begin();
-      edm::Handle<pat::METCollection> METhandle;
-      evt.getByToken(*(srcMETs_.begin()), METhandle);
-      metPlus MET((*METhandle)[0]);
-      patMETCollection->push_back((*METhandle)[0]);
   }
   evt.put(patMETCollection,mvaMETLabel_);
 }
