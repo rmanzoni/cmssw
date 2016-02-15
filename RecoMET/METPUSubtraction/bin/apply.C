@@ -68,7 +68,8 @@ int main(int argc, char* argv[] ) {
   std::string weightfilename = pt.get<std::string>("weightfilename");
 
   TFile *inputFile = TFile::Open(inputFilename.c_str());
-  TTree *inputTree = (TTree*)(inputFile->Get("MAPAnalyzer/t"));
+  std::string foldername = pt.get<std::string>("Folder");
+  TTree *inputTree = (TTree*)(inputFile->Get(foldername.c_str()));
 
   std::cout << "input tree: " << inputTree << std::endl;
   std::cout << "This many: " << trainingProperties.size() << std::endl;
