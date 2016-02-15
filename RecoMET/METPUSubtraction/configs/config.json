@@ -100,13 +100,13 @@
 			"friends" : ["LongZCorrectedRecoil"],
 			"desc" : "Cov1 training",
 			"apply_MVA_to" : "LongZCorrectedRecoil",
-			"weight" : "select",
+			"weight" : "select&&((Boson_Pt/LongZCorrectedRecoil_Pt)<5)",
 			"name" : "CovU1",
 			"folder" : "Flat",
 			"minEvents" : 250,
 			"shrinkage" : 0.05,
 			"minCutSignificance" : 3.0,
-			"targetVariable" : "std::abs(Boson_Pt*cos(Boson_Phi-LongZCorrectedRecoil_LongZ)-LongZCorrectedRecoil_Pt)/LongZCorrectedRecoil_Pt*sqrt(TMath::Pi()/2.)",
+			"targetVariable" : "(Boson_Pt*cos(Boson_Phi-LongZCorrectedRecoil_Phi-TMath::Pi())-LongZCorrectedRecoil_Pt)/LongZCorrectedRecoil_Pt*sqrt(TMath::Pi()/2.)",
 			"nTrees" : 1000,
 			"trainingVariables" : 
 				[	
@@ -142,14 +142,14 @@
 			"friends" : ["LongZCorrectedRecoil"],
 			"desc" : "Cov2 training",
 			"apply_MVA_to" : "LongZCorrectedRecoil",
-			"weight" : "select",
+			"weight" : "select&&((Boson_Pt/LongZCorrectedRecoil_Pt)<5)",
 			"name" : "CovU2",
 			"folder" : "Flat",
 			"minEvents" : 250,
 			"shrinkage" : 0.05,
 			"minCutSignificance" : 3.0,
 			"nTrees" : 1000,
-			"targetVariable" : "abs(Boson_Pt*sin(Boson_Phi-LongZCorrectedRecoil_Phi))*sqrt(TMath::Pi()/2.)/LongZCorrectedRecoil_Pt",
+			"targetVariable" : "(Boson_Pt*sin(Boson_Phi-LongZCorrectedRecoil_Phi))*sqrt(TMath::Pi()/2.)/LongZCorrectedRecoil_Pt",
 			"trainingVariables" : 
 				[	
 				"LongZCorrectedRecoil_Phi",
