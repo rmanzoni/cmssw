@@ -371,7 +371,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
 
     // calculate new mvaMET
     pat::MET mvaMET(referenceRecoil);
-    mvaMET.setP4(- Z.p4() + recoilP4);
+    mvaMET.setP4(Z.p4() - recoilP4);
     mvaMET.setSumEt(referenceRecoil.sumEt() + Z.sumEt_Leptons);
 
     reco::METCovMatrix mvaMETCov;
