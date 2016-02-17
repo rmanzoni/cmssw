@@ -182,7 +182,7 @@ def runMVAMET(process,
 
     ### MVA MET
     setattr(process,"MVAMET", cms.EDProducer("MVAMET",                                                
-                                                debug = cms.bool(False),
+                                                debug = cms.bool(True),
                                                 requireOS = cms.bool(True),
                                                 combineNLeptons = cms.int32(2),
                                                 MVAMETLabel = cms.string("MVAMET"),

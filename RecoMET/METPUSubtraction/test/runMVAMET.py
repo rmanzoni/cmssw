@@ -43,7 +43,8 @@ process.p = cms.Path(process.jmfw_analyzers)
 process.genZEvent = cms.EDFilter("GenParticleSelector",
     filter = cms.bool(True),
     src = cms.InputTag("prunedGenParticles"),
-    cut = cms.string('abs(pdgId()) == 13 && !isDirectPromptTauDecayProductFinalState()'),
+    #cut = cms.string('abs(pdgId()) == 13 && !isDirectPromptTauDecayProductFinalState()'),
+    cut = cms.string('isDirectPromptTauDecayProductFinalState()'),
     stableOnly = cms.bool(False)
 )
 

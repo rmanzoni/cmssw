@@ -6,6 +6,8 @@ for met in ["patpfMET", "patpfMETT1", "patpfTrackMET", "patpfTrackMETT1", "patpf
     metstrings.append("recoil" + met + "_" + postfix)
 
 metstrings.extend([ 
+                 "genMet_Pt",
+                 "genMet_Phi",
                  "weight",
                  "select",
                  "Jet0_Eta",

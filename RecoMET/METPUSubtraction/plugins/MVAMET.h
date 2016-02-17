@@ -21,52 +21,147 @@
 
 #include <TFile.h>
 #include <TVector2.h>
-#include <TLorentzVector.h>
 #include <TMath.h>
 
+// class storing the MET and recoil information
 class metPlus : public pat::MET {
 public:
-  float sumEt_TauJetCharge;
-  float sumEt_TauJetNeutral;
   int METFlag;
   std::string collection_name;
-  reco::Particle tauJetSpouriousComponents;
   metPlus() {}
   metPlus(pat::MET mother) : pat::MET(mother), 
-      sumEt_TauJetCharge(0),
-      sumEt_TauJetNeutral(0),
       METFlag(-1),
-      collection_name("unset")
+      collection_name("unset") {}
+  //function to return METFlags that tell whether the MET was made from PV charged and neutral components
+  bool containsCharged() { return ((this->METFlag == 0) || (this->METFlag == 1)); }
+  bool containsNeutral() { return ((this->METFlag == 0) || (this->METFlag == 2)); } 
+};
+
+
+// class to store constituents of the recoil
+// because the tau is a composite object this information can be stored and accessed with this class
+class recoilComponent {
+  public:
+  recoilComponent(edm::Ptr<reco::Candidate> srcLepton) : srcLepton_(srcLepton) {}
+  edm::Ptr<reco::Candidate> srcLepton_;
+  edm::Ptr<reco::Candidate> getSrcLepton() { return srcLepton_; }
+  std::vector<reco::CandidatePtr> chargedTauJetCandidates;
+  std::vector<reco::CandidatePtr> neutralTauJetCandidates;
+  reco::Candidate::LorentzVector p4_;
+  reco::Candidate::LorentzVector p4() const { return this->p4_; }
+  void setP4(const reco::Candidate::LorentzVector & p4) { p4_ = p4; }
+  reco::Candidate::LorentzVector chargedP4() const
   {
-      tauJetSpouriousComponents.setP4(reco::Candidate::LorentzVector(0, 0, 0, 0));
+    reco::Candidate::LorentzVector p4;
+    for(const auto tauJet: chargedTauJetCandidates)
+      p4 += tauJet->p4();
+    return p4+this->p4();
   }
+
+  reco::Candidate::LorentzVector neutralP4() const
+  {
+    reco::Candidate::LorentzVector p4;
+    for(auto tauJet: neutralTauJetCandidates)
+      p4 += tauJet->p4();
+    return p4;
+  }
+
+  float chargedSumEt()
+  {
+    float sumEt = 0;
+    for(auto tauJet: chargedTauJetCandidates)
+      sumEt += tauJet->p4().pt();
+    return sumEt + this->p4().pt();
+  }
+
+  float neutralSumEt()
+  {
+    float sumEt = 0;
+    for(auto tauJet: neutralTauJetCandidates)
+      sumEt += tauJet->p4().pt();
+    return sumEt;
+  }
+  int pdgId() { return this->srcLepton_->pdgId(); }
+  bool isMuon() { return (abs(pdgId()) == 13); }
 };
 
 class recoilingBoson : public reco::Particle {
   public: 
+  std::vector<recoilComponent> leptons;
   recoilingBoson()
   {
-    sumEt_Leptons = 0;
     tag = false;
   }
-  std::vector<reco::CandidatePtr> chargedTauJetCandidates;
-  std::vector<reco::CandidatePtr> neutralTauJetCandidates;
-  float sumEt_Leptons;
-  std::vector<int> pdgIds;
-  std::vector<edm::Ptr<reco::Candidate>> leptons;
+
   bool isDiMuon()
   {
-    if(pdgIds.size() == 2)
-      return (std::abs(pdgIds[0]) == 13 and std::abs(pdgIds[1]) == 13);
+    if(leptons.size() == 2)
+      return (leptons[0].isMuon() and leptons[1].isMuon());
     else
       return false;
   }
+
   bool select()
   {
         return this->p4().M() > 80 && this->p4().M() < 100 && this->isDiMuon();
   }
   bool tag;
   void setTagged() { this->tag = true; } 
+
+  reco::Candidate::LorentzVector p4vec() const
+  {
+    return (this->chargedP4() + this->neutralP4());
+  }
+
+  reco::Candidate::LorentzVector chargedP4() const
+  {
+    reco::Candidate::LorentzVector p4;
+    for(auto lepton: leptons)
+    {
+      p4 += lepton.chargedP4();
+    }
+    return p4;
+  }
+
+  reco::Candidate::LorentzVector neutralP4() const
+  {
+    reco::Candidate::LorentzVector p4;
+    for(auto lepton: leptons)
+    {
+      p4 += lepton.neutralP4();
+    }
+    return p4;
+  }
+
+  float chargedSumEt() const
+  {
+    float sumEt = 0;
+    for(auto lepton: leptons)
+    {
+      sumEt += lepton.chargedSumEt();
+    }
+    return sumEt; 
+  }
+
+  float neutralSumEt() const
+  {
+    float sumEt = 0;
+    for(auto lepton: leptons)
+    {
+      sumEt += lepton.neutralSumEt();
+    }
+    return sumEt; 
+  }
+
+  double sumEt() const
+  {
+    return (chargedSumEt() + neutralSumEt());
+  }
+
+  int getPdgId(int index)
+  {
+    return leptons[index].pdgId();
+  }
 };
 
 class MVAMET : public edm::stream::EDProducer<> {
@@ -146,5 +241,6 @@ private:
   std::vector<recoilingBoson> Bosons_;
   size_t combineNLeptons_;
   bool requireOS_;
+  edm::Handle<pat::METCollection> referenceMETHandle_;
 }; 
 #endif
