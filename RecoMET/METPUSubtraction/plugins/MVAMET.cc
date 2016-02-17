@@ -33,6 +33,7 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
   debug_ = (cfg.existsAs<bool>("debug")) ? cfg.getParameter<bool>("debug") : false;
   combineNLeptons_ = cfg.getParameter<int>("combineNLeptons");
   requireOS_ = cfg.getParameter<bool>("requireOS");
+  assert( (requireOS_ = true) ^ (combineNLeptons_ !=2));
   useTauSig_    = cfg.getParameter<bool>("useTauSig");
 
   srcVertices_  = consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("srcVertices"));
@@ -53,9 +54,7 @@ MVAMET::MVAMET(const edm::ParameterSet& cfg){
 
   // prepare for saving the final mvaMET to the event
   mvaMETLabel_ = cfg.getParameter<std::string>("MVAMETLabel");
-
   produces<pat::METCollection>(mvaMETLabel_);
-
 }
 
 MVAMET::~MVAMET(){
@@ -67,7 +66,6 @@ MVAMET::~MVAMET(){
 
 metPlus MVAMET::calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt)
 {
-
     reco::METCovMatrix rotateToZFrame;
     auto Zp4 = Z.p4vec();
     rotateToZFrame(0,0) = rotateToZFrame(1,1) = std::cos(- Zp4.Phi());
@@ -76,19 +74,14 @@ metPlus MVAMET::calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt
 
     metPlus Recoil((*MET)); 
     Recoil.setP4( - Recoil.p4() );
-    //Recoil.setP4(MET->tauJetSpouriousComponents.p4() - MET->p4());
-    //Recoil.setSumEt(MET->sumEt());    
-    // subtract Z-Boson if contained in MET to get recoil
     if( MET->containsCharged() )
     {
-      Recoil.setP4(-Z.chargedP4());
+      Recoil.setP4(Recoil.p4() - Z.chargedP4());
       Recoil.setSumEt(Recoil.sumEt()-Z.chargedSumEt());    
     }
  
     if( MET->containsNeutral() )
-    {
       Recoil.setSumEt(Recoil.sumEt()-Z.neutralSumEt());
-    }
 
     reco::METCovMatrix rotatedCovMatrix = rotateToZFrame * Recoil.getSignificanceMatrix();
     Recoil.setSignificanceMatrix( rotatedCovMatrix );
@@ -98,7 +91,8 @@ metPlus MVAMET::calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt
 
 void MVAMET::doCombinations(int offset, int k)
 { 
-  if (k == 0) {
+  if (k == 0)
+  {
     combinations_.push_back(combination_);
     combination_.pop_back();
     return;
@@ -108,12 +102,7 @@ void MVAMET::doCombinations(int offset, int k)
     combination_.push_back(allLeptons_[i]);
     doCombinations(i+1, k-1);
   }
-    combination_.clear();
-}
-
-void MVAMET::cleanLeptonsFromSS()
-{
-  combinations_.erase(std::remove_if(combinations_.begin(), combinations_.end(), [](std::vector<edm::Ptr<reco::Candidate>> pair) { return pair[0]->charge() == pair[1]->charge(); }), combinations_.end());
+  combination_.clear();
 }
 
 void MVAMET::handleTaus(edm::Ptr<reco::Candidate> lepton, recoilingBoson& Z, const pat::TauCollection& tauCollection)
@@ -127,15 +116,14 @@ void MVAMET::handleTaus(edm::Ptr<reco::Candidate> lepton, recoilingBoson& Z, con
     for(auto candidate : tau.signalCands())
     {
       if(abs(candidate->pdgId()) > 11 and abs(candidate->pdgId()) < 16)
+      {
+        std::cout << "tau candidate pdgid: " << candidate->pdgId() << " , " << candidate->p4().pt() << std::endl;
         continue;
+      }
       if(candidate->charge() !=0)
-      {
         rComp.chargedTauJetCandidates.push_back(candidate);
-      }
       else
-      {
         rComp.neutralTauJetCandidates.push_back(candidate);
-      }
     }
   }
   Z.leptons.push_back(rComp);
@@ -157,20 +145,16 @@ void MVAMET::handleMuons(edm::Ptr<reco::Candidate> lepton, recoilingBoson& Z, co
   }
 
   if(p4Photon.E() > 0 )
-  {
     rComp.setP4(lepton->p4() + p4Photon);
-  }
   else
-  {
     rComp.setP4(lepton->p4());
-  }
+
   Z.leptons.push_back(rComp);
 }
 
 void MVAMET::calculateRecoilingObjects(edm::Event &evt, const pat::MuonCollection& muCollection, const pat::TauCollection& tauCollection)
 {
   // loop on all the indentified leptons and put them in a common vector allLeptons_
-  assert( (requireOS_ = true) ^ (combineNLeptons_ !=2));
   allLeptons_.clear();
   combinations_.clear();
   for ( std::vector<edm::EDGetTokenT<reco::CandidateView > >::const_iterator srcLeptons_i = srcLeptons_.begin(); srcLeptons_i != srcLeptons_.end(); ++srcLeptons_i )
@@ -178,9 +162,7 @@ void MVAMET::calculateRecoilingObjects(edm::Event &evt, const pat::MuonCollectio
     edm::Handle<reco::CandidateView> leptons;
     evt.getByToken(*srcLeptons_i, leptons);
     for (size_t i=0; i < leptons->size(); ++i)
-    {
       allLeptons_.push_back(leptons->ptrAt(i));
-    }
   }
 
   if(allLeptons_.size() >= combineNLeptons_ )
@@ -200,7 +182,6 @@ void MVAMET::calculateRecoilingObjects(edm::Event &evt, const pat::MuonCollectio
     recoilingBoson Z;
     for(auto lepton : leptonpair)
     {
-      //Z.pdgIds.push_back(lepton->pdgId());
       if(abs(lepton->pdgId()) == 13)
         handleMuons( lepton, Z, muCollection);
       else if(abs(lepton->pdgId()) == 15)
@@ -248,10 +229,12 @@ void MVAMET::TagZ()
   std::vector<recoilingBoson>::iterator taggedBoson = Bosons_.begin(); 
   for(std::vector<recoilingBoson>::iterator Z= Bosons_.begin(); Z != Bosons_.end(); Z++)
   {
-    if(taggedBoson->p4().pt() < Z->p4().pt())
+//    std::cout << "TagZ " << Z->p4vec().pt() << std::endl;
+    if(taggedBoson->p4vec().pt() < Z->p4vec().pt())
       taggedBoson = Z;
   }
   taggedBoson->setTagged();
+  //std::cout << "Tagged: " << taggedBoson->p4vec().pt() << std::endl;
 }
 
 void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
@@ -329,35 +312,15 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
 
       if(i==0)
       {
-        auto genMet = (*METhandle)[0].genMET();
-        var_["genMet_Pt"] = genMet->p4().pt();
-        var_["genMet_Phi"] = genMet->p4().phi();
+        genMET_ = (*METhandle)[0].genMET();
+        var_["genMet_Pt"] = genMET_->p4().pt();
+        var_["genMet_Phi"] = genMET_->p4().phi();
       }
-      // charged components
-      /*
-      if ( ((*itMETFlags)==0) or ((*itMETFlags)==1) )
-      {
-        for( auto particle : Z.chargedTauJetCandidates)
-        {
-          MET.tauJetSpouriousComponents.setP4(MET.tauJetSpouriousComponents.p4()+particle->p4());            
-          MET.sumEt_TauJetCharge += particle->p4().Et();
-        }
-      }
-      // neutral components
-      if ( ((*itMETFlags)==0) or ((*itMETFlags)==2) )
-      {
-        for( auto particle : Z.neutralTauJetCandidates)
-        {
-          MET.tauJetSpouriousComponents.setP4(MET.tauJetSpouriousComponents.p4()+particle->p4());            
-          MET.sumEt_TauJetNeutral += particle->p4().Et();
-        }
-      }
-      */
+
       auto Recoil = calculateRecoil(&MET, Z, evt);
       if(i == 0)
-      {
         referenceRecoil = Recoil;
-      }
+
       addToMap(Recoil, referenceRecoil);
       if(saveMap_)
         addToMap(Recoil, Z);
@@ -366,18 +329,16 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
 
     // evaluate phi training and apply angular correction
     Float_t PhiAngle = GetResponse(mvaReaderPhiCorrection_, variablesForPhiTraining_);
-    var_["PhiTrainingResponse"] = PhiAngle;
 
     auto refRecoil = TVector2(referenceRecoil.p4().px(), referenceRecoil.p4().py());
     refRecoil = refRecoil.Rotate(PhiAngle);
     reco::Candidate::LorentzVector phiCorrectedRecoil(refRecoil.Px(), refRecoil.Py(), 0, referenceRecoil.sumEt());
     addToMap(phiCorrectedRecoil, referenceRecoil.sumEt(), "PhiCorrectedRecoil");
   
-    var_["PhiCorrectedRecoil_Phi"] = TVector2::Phi_mpi_pi(refRecoil.Phi());
+    //var_["PhiCorrectedRecoil_Phi"] = TVector2::Phi_mpi_pi(refRecoil.Phi());
 
     // evaluate second training and apply recoil correction
     Float_t RecoilCorrection = GetResponse(mvaReaderRecoilCorrection_, variablesForRecoilTraining_);
-    var_["RecoilTrainingResponse"] = RecoilCorrection;
     refRecoil *= RecoilCorrection;
 
     // create pat::MET from recoil
@@ -414,29 +375,34 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
       mvaMET.setSignificanceMatrix(mvaMETCov + tausMatrix);
     else
       mvaMET.setSignificanceMatrix(mvaMETCov);
-     
 
     // add constituent info to pat::MET
     size_t iCount=0;
     for(auto lepton: Z.leptons)
-    {
-    //  lepton.p4().pt();
       mvaMET.addUserCand("lepton" + std::to_string(iCount++), lepton.getSrcLepton());
-    }
 
     // save MVA MET results
     mvaMET.addUserFloat("PhiCorrection", PhiAngle);
     mvaMET.addUserFloat("LongZCorrection", RecoilCorrection);
     mvaMET.addUserFloat("CovU1", CovU1Correction);
     mvaMET.addUserFloat("CovU2", CovU2Correction);
-
     patMETCollection->push_back(mvaMET);
-   var_["MVAMET_Pt"] = mvaMET.p4().pt();
-   var_["MVAMET_Phi"] = mvaMET.p4().phi() ;
-   var_["MVAMET_sumEt"] = mvaMET.sumEt();
+
    // muon selection for training
     if(saveMap_)
     {
+      var_["PhiTrainingResponse"] = PhiAngle;
+      var_["RecoilTrainingResponse"] = RecoilCorrection;
+      var_["MVAMET_Pt"] = mvaMET.p4().pt();
+      var_["MVAMET_Phi"] = mvaMET.p4().phi() ;
+      var_["MVAMET_sumEt"] = mvaMET.sumEt();
+   
+      reco::Candidate::LorentzVector dmvamet = genMET_->p4() - mvaMET.p4();
+      var_["dmvamet_Pt"] =    dmvamet.Pt();
+      var_["dmvamet_Phi"] =   dmvamet.Phi();
+      reco::Candidate::LorentzVector dpfmet = genMET_->p4() - (*referenceMETHandle_)[0].p4();
+      var_["dpfmet_Pt"] =    dpfmet.Pt();
+      var_["dpfmet_Phi"] =   dpfmet.Phi();
       if(Z.tag)
       {
         addToMap(Z);
@@ -450,7 +416,7 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
    for(auto entry : var_)
      std::cout << entry.first << " : " << entry.second << std::endl;
   }
-  evt.put(patMETCollection,mvaMETLabel_);
+  evt.put(patMETCollection, mvaMETLabel_);
 }
 
 void MVAMET::saveMap(edm::Event& evt)
@@ -466,6 +432,7 @@ void MVAMET::saveMap(edm::Event& evt)
   evt.put(variables);
 
 }
+
 void MVAMET::addToMap(const metPlus &recoil, const recoilingBoson &Z)
 {
   reco::Candidate::LorentzVector p4(Z.chargedP4() );

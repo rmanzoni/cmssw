@@ -86,32 +86,19 @@ class recoilComponent {
 };
 
 class recoilingBoson : public reco::Particle {
-  public: 
+ public: 
   std::vector<recoilComponent> leptons;
-  recoilingBoson()
-  {
-    tag = false;
-  }
+  recoilingBoson() : tag(false) {}
 
-  bool isDiMuon()
-  {
-    if(leptons.size() == 2)
-      return (leptons[0].isMuon() and leptons[1].isMuon());
-    else
-      return false;
-  }
+  bool isDiMuon() { return (leptons.size() == 2) ? (leptons[0].isMuon() and leptons[1].isMuon()) : false; }
+  bool select() { return this->p4vec().M() > 80 && this->p4vec().M() < 100 && this->isDiMuon(); }
 
-  bool select()
-  {
-        return this->p4().M() > 80 && this->p4().M() < 100 && this->isDiMuon();
-  }
+  // tag: taggs the combination with the highest pt
+  // might be dropped since 3rd lepton veto is applied anyway for the training
   bool tag;
   void setTagged() { this->tag = true; } 
 
-  reco::Candidate::LorentzVector p4vec() const
-  {
-    return (this->chargedP4() + this->neutralP4());
-  }
+  reco::Candidate::LorentzVector p4vec() const { return (this->chargedP4() + this->neutralP4()); }
 
   reco::Candidate::LorentzVector chargedP4() const
   {
@@ -153,15 +140,8 @@ class recoilingBoson : public reco::Particle {
     return sumEt; 
   }
 
-  double sumEt() const
-  {
-    return (chargedSumEt() + neutralSumEt());
-  }
-
-  int getPdgId(int index)
-  {
-    return leptons[index].pdgId();
-  }
+  double sumEt() const { return (chargedSumEt() + neutralSumEt()); }
+  int getPdgId(int index) { return leptons[index].pdgId(); }
 };
 
 class MVAMET : public edm::stream::EDProducer<> {
@@ -198,7 +178,10 @@ private:
   void doCombinations(int offset, int k);
   void saveMap(edm::Event& evt);
   void calculateRecoilingObjects(edm::Event& evt, const pat::MuonCollection&, const pat::TauCollection& );
-  void cleanLeptonsFromSS();
+  void cleanLeptonsFromSS()
+  { 
+    combinations_.erase(std::remove_if(combinations_.begin(), combinations_.end(), [](std::vector<edm::Ptr<reco::Candidate>> pair) { return pair[0]->charge() == pair[1]->charge(); }), combinations_.end());
+   }
   void handleMuons(edm::Ptr<reco::Candidate> lepton, recoilingBoson& Z, const pat::MuonCollection& );
   void handleTaus(edm::Ptr<reco::Candidate> lepton, recoilingBoson& Z, const pat::TauCollection& );
   void fillEventInformation(edm::Event&);
@@ -242,5 +225,6 @@ private:
   size_t combineNLeptons_;
   bool requireOS_;
   edm::Handle<pat::METCollection> referenceMETHandle_;
+  const reco::GenMET * genMET_;
 }; 
 #endif
