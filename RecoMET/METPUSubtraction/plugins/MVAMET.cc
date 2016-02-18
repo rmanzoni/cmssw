@@ -115,6 +115,11 @@ void MVAMET::handleTaus(edm::Ptr<reco::Candidate> lepton, recoilingBoson& Z, con
 
     for(auto candidate : tau.signalCands())
     {
+      if(abs(candidate->pdgId()) > 11 and abs(candidate->pdgId()) < 16)
+      {
+        std::cout << "tau candidate pdgid: " << candidate->pdgId() << " , " << candidate->p4().pt() << std::endl;
+        continue;
+      }
       if(candidate->charge() !=0)
         rComp.chargedTauJetCandidates.push_back(candidate);
       else
