@@ -2,7 +2,6 @@ import sys
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 from PhysicsTools.PatAlgos.tools.tauTools import *
-from PhysicsTools.SelectorUtils.tools.vid_id_tools import switchOnVIDElectronIdProducer, switchOnVIDPhotonIdProducer, DataFormat, setupAllVIDIdsInModule, setupVIDElectronSelection, setupVIDPhotonSelection
 from RecoMET.METPUSubtraction.MVAMETConfiguration_cff import runMVAMET
 
 options = VarParsing ('python')
@@ -20,25 +19,6 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 process.GlobalTag.globaltag = options.globalTag
 
-if not hasattr(process,"egmGsfElectronIDs"):
-    electronIdModules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',
-                         'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
-
-    switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
-
-    for idMod in electronIdModules:
-        setupAllVIDIdsInModule(process, idMod, setupVIDElectronSelection)
-
-if not hasattr(process,"VersionedPhotonIdProducer"):
-    switchOnVIDPhotonIdProducer(process, DataFormat.MiniAOD)
-
-    photonIdModules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_PHYS14_PU20bx25_V2_cff']
-
-    for idMod in photonIdModules:
-        setupAllVIDIdsInModule(process, idMod, setupVIDPhotonSelection)
- ## create the Path
-process.jmfw_analyzers = cms.Sequence()
-process.p = cms.Path(process.jmfw_analyzers)
 
 process.genZEvent = cms.EDFilter("GenParticleSelector",
     filter = cms.bool(True),

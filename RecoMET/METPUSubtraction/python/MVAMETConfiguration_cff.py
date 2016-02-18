@@ -12,6 +12,7 @@ from RecoMET.METPUSubtraction.LeptonSelectionTools_cff import cleanJetsFromLepto
 from RecoMET.METProducers.PFMET_cfi import pfMet
 from JetMETCorrections.Type1MET.correctionTermsPfMetType1Type2_cff import corrPfMetType1
 from JetMETCorrections.Type1MET.correctedMet_cff import pfMetT1
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import switchOnVIDElectronIdProducer, switchOnVIDPhotonIdProducer, DataFormat, setupAllVIDIdsInModule, setupVIDElectronSelection, setupVIDPhotonSelection
 
 def runMVAMET(process,
                  srcMuons =  "slimmedMuons", ## inputMuonCollection
@@ -32,6 +33,26 @@ def runMVAMET(process,
                  saveMapForTraining = False
                  ):
 
+    if not hasattr(process,"egmGsfElectronIDs"):
+        electronIdModules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',
+                             'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
+    
+        switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+    
+        for idMod in electronIdModules:
+            setupAllVIDIdsInModule(process, idMod, setupVIDElectronSelection)
+    
+    if not hasattr(process,"VersionedPhotonIdProducer"):
+        switchOnVIDPhotonIdProducer(process, DataFormat.MiniAOD)
+    
+        photonIdModules = ['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_PHYS14_PU20bx25_V2_cff']
+    
+        for idMod in photonIdModules:
+            setupAllVIDIdsInModule(process, idMod, setupVIDPhotonSelection)
+
+     ## create the Path
+    process.jmfw_analyzers = cms.Sequence()
+    process.p = cms.Path(process.jmfw_analyzers)
     # additional contribution from hadronically decaying taus
     from RecoMET.METPUSubtraction.tausSignificance import tausSignificance, tauMET, tauPFMET, tauDecayProducts
     process.tausSignificance = tausSignificance
