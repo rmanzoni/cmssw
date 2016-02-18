@@ -5,7 +5,7 @@ for met in ["patpfMET", "patpfMETT1", "patpfTrackMET", "patpfTrackMETT1", "patpf
   for postfix in postfixes:
     metstrings.append("recoil" + met + "_" + postfix)
 
-metstrings.extend([ 
+metstrings.extend([ "dmvamet_Pt", "dmvamet_Phi", "dpfmet_Pt", "dpfmet_Phi", "MVAMET_Pt", "MVAMET_sumEt", "MVAMET_Phi", "PhiTrainingResponse", "RecoilTrainingResponse",
                  "genMet_Pt",
                  "genMet_Phi",
                  "weight",

@@ -41,13 +41,14 @@ public:
 // class to store constituents of the recoil
 // because the tau is a composite object this information can be stored and accessed with this class
 class recoilComponent {
-  public:
-  recoilComponent(edm::Ptr<reco::Candidate> srcLepton) : srcLepton_(srcLepton) {}
+ private:
   edm::Ptr<reco::Candidate> srcLepton_;
-  edm::Ptr<reco::Candidate> getSrcLepton() { return srcLepton_; }
+  reco::Candidate::LorentzVector p4_;
+ public:
   std::vector<reco::CandidatePtr> chargedTauJetCandidates;
   std::vector<reco::CandidatePtr> neutralTauJetCandidates;
-  reco::Candidate::LorentzVector p4_;
+  recoilComponent(edm::Ptr<reco::Candidate> srcLepton) : srcLepton_(srcLepton) {}
+  edm::Ptr<reco::Candidate> getSrcLepton() { return srcLepton_; }
   reco::Candidate::LorentzVector p4() const { return this->p4_; }
   void setP4(const reco::Candidate::LorentzVector & p4) { p4_ = p4; }
   reco::Candidate::LorentzVector chargedP4() const
@@ -86,17 +87,18 @@ class recoilComponent {
 };
 
 class recoilingBoson : public reco::Particle {
- public: 
-  std::vector<recoilComponent> leptons;
-  recoilingBoson() : tag(false) {}
-
-  bool isDiMuon() { return (leptons.size() == 2) ? (leptons[0].isMuon() and leptons[1].isMuon()) : false; }
-  bool select() { return this->p4vec().M() > 80 && this->p4vec().M() < 100 && this->isDiMuon(); }
-
   // tag: taggs the combination with the highest pt
   // might be dropped since 3rd lepton veto is applied anyway for the training
   bool tag;
+
+ public: 
+  std::vector<recoilComponent> leptons;
+  recoilingBoson() : tag(false) {}
+  void addLepton(recoilComponent rComp) { this->leptons.push_back(rComp); }
+  bool isDiMuon() { return (leptons.size() == 2) ? (leptons[0].isMuon() and leptons[1].isMuon()) : false; }
+  bool select() { return this->p4vec().M() > 80 && this->p4vec().M() < 100 && this->isDiMuon(); }
   void setTagged() { this->tag = true; } 
+  bool isTagged() { return this->tag; } 
 
   reco::Candidate::LorentzVector p4vec() const { return (this->chargedP4() + this->neutralP4()); }
 
@@ -171,7 +173,6 @@ class MVAMET : public edm::stream::EDProducer<> {
   void addToMap(recoilingBoson &Z);
   void addToMap(const metPlus &recoil, const recoilingBoson &Z);
 
-
   metPlus calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt);
   void TagZ();
 private:
@@ -190,7 +191,6 @@ private:
   vInputTag srcMETTags_;
   
   std::vector<edm::EDGetTokenT<pat::METCollection > >  srcMETs_;
-  edm::EDGetTokenT<pat::METCollection>                 referenceMET_;
   edm::EDGetTokenT<reco::VertexCollection>             srcVertices_;
   edm::EDGetTokenT<pat::JetCollection>                 srcJets_;
   std::vector<edm::EDGetTokenT<reco::CandidateView > > srcLeptons_;
@@ -198,7 +198,6 @@ private:
   edm::EDGetTokenT<pat::MuonCollection>                srcMuons_;
   edm::EDGetTokenT<math::Error<2>::type> srcTausSignificance_; 
   bool useTauSig_;
-  std::string referenceMET_name_;
   
   std::vector<int> srcMETFlags_;
   
@@ -225,6 +224,7 @@ private:
   size_t combineNLeptons_;
   bool requireOS_;
   edm::Handle<pat::METCollection> referenceMETHandle_;
+  // to be removed
   const reco::GenMET * genMET_;
 }; 
 #endif
