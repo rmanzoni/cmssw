@@ -48,13 +48,13 @@ class recoilComponent {
   std::vector<reco::CandidatePtr> chargedTauJetCandidates;
   std::vector<reco::CandidatePtr> neutralTauJetCandidates;
   recoilComponent(edm::Ptr<reco::Candidate> srcLepton) : srcLepton_(srcLepton) {}
-  edm::Ptr<reco::Candidate> getSrcLepton() { return srcLepton_; }
+  edm::Ptr<reco::Candidate> getSrcLepton() const { return srcLepton_; }
   reco::Candidate::LorentzVector p4() const { return this->p4_; }
   void setP4(const reco::Candidate::LorentzVector & p4) { p4_ = p4; }
   reco::Candidate::LorentzVector chargedP4() const
   {
     reco::Candidate::LorentzVector p4;
-    for(const auto tauJet: chargedTauJetCandidates)
+    for(const auto & tauJet: chargedTauJetCandidates)
       p4 += tauJet->p4();
     return p4+this->p4();
   }
@@ -62,28 +62,28 @@ class recoilComponent {
   reco::Candidate::LorentzVector neutralP4() const
   {
     reco::Candidate::LorentzVector p4;
-    for(auto tauJet: neutralTauJetCandidates)
+    for(const auto & tauJet: neutralTauJetCandidates)
       p4 += tauJet->p4();
     return p4;
   }
 
-  float chargedSumEt()
+  float chargedSumEt() const
   {
     float sumEt = 0;
-    for(auto tauJet: chargedTauJetCandidates)
+    for(const auto & tauJet: chargedTauJetCandidates)
       sumEt += tauJet->p4().pt();
     return sumEt + this->p4().pt();
   }
 
-  float neutralSumEt()
+  float neutralSumEt() const
   {
     float sumEt = 0;
-    for(auto tauJet: neutralTauJetCandidates)
+    for(const auto & tauJet: neutralTauJetCandidates)
       sumEt += tauJet->p4().pt();
     return sumEt;
   }
-  int pdgId() { return this->srcLepton_->pdgId(); }
-  bool isMuon() { return (abs(pdgId()) == 13); }
+  int pdgId() const { return this->srcLepton_->pdgId(); }
+  bool isMuon() const { return (abs(pdgId()) == 13); }
 };
 
 class recoilingBoson : public reco::Particle {
@@ -95,55 +95,51 @@ class recoilingBoson : public reco::Particle {
   std::vector<recoilComponent> leptons;
   recoilingBoson() : tag(false) {}
   void addLepton(recoilComponent rComp) { this->leptons.push_back(rComp); }
-  bool isDiMuon() { return (leptons.size() == 2) ? (leptons[0].isMuon() and leptons[1].isMuon()) : false; }
-  bool select() { return this->p4vec().M() > 80 && this->p4vec().M() < 100 && this->isDiMuon(); }
+  bool isDiMuon() const { return (leptons.size() == 2) ? (leptons[0].isMuon() and leptons[1].isMuon()) : false; }
+  bool select() const { return this->p4vec().M() > 80 && this->p4vec().M() < 100 && this->isDiMuon(); }
   void setTagged() { this->tag = true; } 
-  bool isTagged() { return this->tag; } 
+  bool isTagged() const { return this->tag; } 
 
   reco::Candidate::LorentzVector p4vec() const { return (this->chargedP4() + this->neutralP4()); }
 
   reco::Candidate::LorentzVector chargedP4() const
   {
     reco::Candidate::LorentzVector p4;
-    for(auto lepton: leptons)
-    {
+    for(const auto & lepton: leptons)
       p4 += lepton.chargedP4();
-    }
+
     return p4;
   }
 
   reco::Candidate::LorentzVector neutralP4() const
   {
     reco::Candidate::LorentzVector p4;
-    for(auto lepton: leptons)
-    {
+    for(const auto & lepton: leptons)
       p4 += lepton.neutralP4();
-    }
+
     return p4;
   }
 
   float chargedSumEt() const
   {
     float sumEt = 0;
-    for(auto lepton: leptons)
-    {
+    for(const auto & lepton: leptons)
       sumEt += lepton.chargedSumEt();
-    }
+
     return sumEt; 
   }
 
   float neutralSumEt() const
   {
     float sumEt = 0;
-    for(auto lepton: leptons)
-    {
+    for(const auto & lepton: leptons)
       sumEt += lepton.neutralSumEt();
-    }
+
     return sumEt; 
   }
 
   double sumEt() const { return (chargedSumEt() + neutralSumEt()); }
-  int getPdgId(int index) { return leptons[index].pdgId(); }
+  int getPdgId(int index) const { return leptons[index].pdgId(); }
 };
 
 class MVAMET : public edm::stream::EDProducer<> {
@@ -170,10 +166,10 @@ class MVAMET : public edm::stream::EDProducer<> {
   // to correctly create the map of regression input vriables
   void addToMap(const reco::Candidate::LorentzVector p4, const double sumEt, const std::string &type);
   void addToMap(const metPlus &recoil, const metPlus &referenceMET);
-  void addToMap(recoilingBoson &Z);
+  void addToMap(const recoilingBoson &Z);
   void addToMap(const metPlus &recoil, const recoilingBoson &Z);
 
-  metPlus calculateRecoil(metPlus* MET, recoilingBoson &Z, edm::Event& evt);
+  metPlus calculateRecoil(metPlus* MET, const recoilingBoson &Z, edm::Event& evt);
   void TagZ();
 private:
   void doCombinations(int offset, int k);
