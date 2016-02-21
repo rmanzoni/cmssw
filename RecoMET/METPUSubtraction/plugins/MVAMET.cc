@@ -309,9 +309,12 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
       // to be removed begin
       if(i==0)
       {
-        genMET_ = (*METhandle)[0].genMET();
-        var_["genMet_Pt"] = genMET_->p4().pt();
-        var_["genMet_Phi"] = genMET_->p4().phi();
+        if(saveMap_)
+        {
+          genMET_ = (*METhandle)[0].genMET();
+          var_["genMet_Pt"] = genMET_->p4().pt();
+          var_["genMet_Phi"] = genMET_->p4().phi();
+        }
       }
       // to be removed end
 
