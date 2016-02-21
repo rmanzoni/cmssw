@@ -19,19 +19,8 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 process.GlobalTag.globaltag = options.globalTag
 
-
-process.genZEvent = cms.EDFilter("GenParticleSelector",
-    filter = cms.bool(True),
-    src = cms.InputTag("prunedGenParticles"),
-    cut = cms.string('abs(pdgId()) == 13 && !isDirectPromptTauDecayProductFinalState()'),
-    #cut = cms.string('isDirectPromptTauDecayProductFinalState()'),
-    stableOnly = cms.bool(False)
-)
-
-
 # configure MVA MET
 runMVAMET( process)
-
 
 ## set input files
 process.source = cms.Source("PoolSource")
@@ -56,6 +45,13 @@ if options.saveMapForTraining:
     from RecoMET.METPUSubtraction.mapAnalyzer_cff import MAPAnalyzer
     process.MAPAnalyzer = MAPAnalyzer
     process.MVAMET.saveMap = cms.bool(True)
+    process.genZEvent = cms.EDFilter("GenParticleSelector",
+        filter = cms.bool(True),
+        src = cms.InputTag("prunedGenParticles"),
+        cut = cms.string('abs(pdgId()) == 13 && !isDirectPromptTauDecayProductFinalState()'),
+        #cut = cms.string('isDirectPromptTauDecayProductFinalState()'),
+        stableOnly = cms.bool(False)
+    )
     process.skimmvamet = cms.Sequence( process.genZEvent * process.MVAMET * process.MAPAnalyzer)
     process.p *= (process.skimmvamet)
 
