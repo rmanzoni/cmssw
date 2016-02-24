@@ -1,7 +1,6 @@
-#include "RecoTauTag/HLTProducers/interface/L1HLTJetsMatching.h"
+#include "RecoTauTag/HLTProducers/interface/L1THLTJetsMatching.h"
 #include "Math/GenVector/VectorUtil.h"
-#include "DataFormats/L1Trigger/interface/L1JetParticle.h"
-#include "DataFormats/L1Trigger/interface/L1JetParticleFwd.h"
+#include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 //
@@ -12,31 +11,30 @@ using namespace std;
 using namespace edm;
 using namespace l1extra;
 
-L1HLTJetsMatching::L1HLTJetsMatching(const edm::ParameterSet& iConfig)
+L1THLTJetsMatching::L1THLTJetsMatching(const edm::ParameterSet& iConfig)
 {
-  jetSrc = consumes<edm::View<reco::Candidate> >(iConfig.getParameter<InputTag>("JetSrc") );
+  jetSrc     = consumes<edm::View<reco::Candidate> >         (iConfig.getParameter<InputTag>("JetSrc"      ) );
   tauTrigger = consumes<trigger::TriggerFilterObjectWithRefs>(iConfig.getParameter<InputTag>("L1TauTrigger") );
-  mEt_Min = iConfig.getParameter<double>("EtMin");
+  mEt_Min    =                                                iConfig.getParameter<double>  ("EtMin"       )  ;
   
   produces<CaloJetCollection>();
 }
 
-L1HLTJetsMatching::~L1HLTJetsMatching(){ }
+L1THLTJetsMatching::~L1THLTJetsMatching(){ }
 
-void L1HLTJetsMatching::produce(edm::Event& iEvent, const edm::EventSetup& iES)
+void L1THLTJetsMatching::produce(edm::Event& iEvent, const edm::EventSetup& iES)
 {
 	
-  using namespace edm;
-  using namespace std;
-  using namespace reco;
+  using namespace edm    ;
+  using namespace std    ;
+  using namespace reco   ;
   using namespace trigger;
-  using namespace l1extra;
   
   typedef std::vector<LeafCandidate> LeafCandidateCollection;
   
   auto_ptr<CaloJetCollection> tauL2jets(new CaloJetCollection);
   
-  double deltaR = 1.0;
+  double deltaR    = 1.0;
   double matchingR = 0.5;
   //Getting HLT jets to be matched
   edm::Handle<edm::View<Candidate> > tauJets;
@@ -58,7 +56,7 @@ void L1HLTJetsMatching::produce(edm::Event& iEvent, const edm::EventSetup& iES)
   
   for( unsigned int iL1Tau=0; iL1Tau <tauCandRefVec.size();iL1Tau++)
     {  
-      for(unsigned int iJet=0;iJet<tauJets->size();iJet++)
+      for(unsigned int iJet=0; iJet<tauJets->size(); iJet++)
 	{
 	  //Find the relative L2TauJets, to see if it has been reconstructed
 	  const Candidate &  myJet = (*tauJets)[iJet];

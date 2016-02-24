@@ -17,10 +17,10 @@
 #include <map>
 #include <vector>
 
-class L1THLTJETSMATCHING: public edm::EDProducer {
+class L1THLTJetsMatching: public edm::EDProducer {
  public:
-  explicit L1THLTJETSMATCHING(const edm::ParameterSet&);
-  ~L1THLTJETSMATCHING();
+  explicit L1THLTJetsMatching(const edm::ParameterSet&);
+  ~L1THLTJetsMatching();
   virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
  private:

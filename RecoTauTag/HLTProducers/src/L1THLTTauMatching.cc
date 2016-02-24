@@ -1,7 +1,6 @@
-#include "RecoTauTag/HLTProducers/interface/L1HLTTauMatching.h"
+#include "RecoTauTag/HLTProducers/interface/L1THLTTauMatching.h"
 #include "Math/GenVector/VectorUtil.h"
-#include "DataFormats/L1Trigger/interface/L1JetParticle.h"
-#include "DataFormats/L1Trigger/interface/L1JetParticleFwd.h"
+#include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/HLTReco/interface/TriggerTypeDefs.h"
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "DataFormats/TauReco/interface/PFTau.h"
@@ -9,32 +8,26 @@
 //
 // class decleration
 //
-using namespace reco;
-using namespace std;
-using namespace edm;
-using namespace l1extra;
+using namespace reco   ;
+using namespace std    ;
+using namespace edm    ;
+using namespace trigger;
 
-L1HLTTauMatching::L1HLTTauMatching(const edm::ParameterSet& iConfig):
-  jetSrc( consumes<PFTauCollection>(iConfig.getParameter<InputTag>("JetSrc") ) ),
+L1THLTTauMatching::L1THLTTauMatching(const edm::ParameterSet& iConfig):
+  jetSrc    ( consumes<PFTauCollection>                     (iConfig.getParameter<InputTag>("JetSrc"      ) ) ),
   tauTrigger( consumes<trigger::TriggerFilterObjectWithRefs>(iConfig.getParameter<InputTag>("L1TauTrigger") ) ),
-  mEt_Min( iConfig.getParameter<double>("EtMin") )
+  mEt_Min   (                                                iConfig.getParameter<double>  ("EtMin"       )   )
 {  
   produces<PFTauCollection>();
 }
-L1HLTTauMatching::~L1HLTTauMatching(){ }
+L1THLTTauMatching::~L1THLTTauMatching(){ }
 
-void L1HLTTauMatching::produce(edm::StreamID iSId, edm::Event& iEvent, const edm::EventSetup& iES) const
+void L1THLTTauMatching::produce(edm::StreamID iSId, edm::Event& iEvent, const edm::EventSetup& iES) const
 {
-	
-  using namespace edm;
-  using namespace std;
-  using namespace reco;
-  using namespace trigger;
-  using namespace l1extra;
 	
   auto_ptr<PFTauCollection> tauL2jets(new PFTauCollection);
 	
-  double deltaR = 1.0;
+  double deltaR    = 1.0;
   double matchingR = 0.5;
   //Getting HLT jets to be matched
   edm::Handle<PFTauCollection > tauJets;
@@ -45,16 +38,16 @@ void L1HLTTauMatching::produce(edm::StreamID iSId, edm::Event& iEvent, const edm
   edm::Handle<trigger::TriggerFilterObjectWithRefs> l1TriggeredTaus;
   iEvent.getByToken(tauTrigger,l1TriggeredTaus);
 				
-  vector<l1extra::L1JetParticleRef> tauCandRefVec;                                                
-  vector<l1extra::L1JetParticleRef> jetCandRefVec;
+  l1t::JetVectorRef tauCandRefVec;
+  l1t::JetVectorRef jetCandRefVec;  
   l1TriggeredTaus->getObjects( trigger::TriggerL1TauJet,tauCandRefVec);
   l1TriggeredTaus->getObjects( trigger::TriggerL1CenJet,jetCandRefVec);
 
   math::XYZPoint a(0.,0.,0.);
 		
-  for( unsigned int iL1Tau=0; iL1Tau <tauCandRefVec.size();iL1Tau++)
+  for( unsigned int iL1Tau = 0; iL1Tau < tauCandRefVec.size(); iL1Tau++)
     {  
-      for(unsigned int iJet=0;iJet<tauJets->size();iJet++)
+      for(unsigned int iJet = 0; iJet < tauJets->size(); iJet++)
 	{
 	  //Find the relative L2TauJets, to see if it has been reconstructed
 	  const PFTau &  myJet = (*tauJets)[iJet];
@@ -74,9 +67,9 @@ void L1HLTTauMatching::produce(edm::StreamID iSId, edm::Event& iEvent, const edm
 	}
     }  
   
-  for(unsigned int iL1Tau=0; iL1Tau <jetCandRefVec.size();iL1Tau++)
+  for(unsigned int iL1Tau=0; iL1Tau < jetCandRefVec.size();iL1Tau++)
     {  
-      for(unsigned int iJet=0;iJet<tauJets->size();iJet++)
+      for(unsigned int iJet=0; iJet < tauJets->size(); iJet++)
 	{
 	  const PFTau &  myJet = (*tauJets)[iJet];
 	  //Find the relative L2TauJets, to see if it has been reconstructed
@@ -104,12 +97,12 @@ void L1HLTTauMatching::produce(edm::StreamID iSId, edm::Event& iEvent, const edm
   // iEvent.put(tauL2LC);
 }
 
-void L1HLTTauMatching::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
+void L1THLTTauMatching::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
 {
   edm::ParameterSetDescription desc;
-  desc.add<edm::InputTag>("L1TauTrigger",edm::InputTag("hltL1sDoubleIsoTau40er"))->setComment("Name of trigger filter");
-  desc.add<edm::InputTag>("JetSrc",edm::InputTag("hltSelectedPFTausTrackPt1MediumIsolationReg"))->setComment("Input collection of PFTaus");
-  desc.add<double>("EtMin",0.0)->setComment("Minimal pT of PFTau to match");
+  desc.add<edm::InputTag>("L1TauTrigger", edm::InputTag("hltL1sDoubleIsoTau40er"                     ))->setComment("Name of trigger filter"    );
+  desc.add<edm::InputTag>("JetSrc"      , edm::InputTag("hltSelectedPFTausTrackPt1MediumIsolationReg"))->setComment("Input collection of PFTaus");
+  desc.add<double>       ("EtMin",0.0)->setComment("Minimal pT of PFTau to match");
   descriptions.setComment("This module produces collection of PFTaus matched to L1ExtraTaus/Jets passing a HLT filter (Only p4 and vertex of returned PFTaus are set).");
-  descriptions.add("L1HLTJetsMatching",desc);
+  descriptions.add       ("L1HLTJetsMatching",desc);
 }

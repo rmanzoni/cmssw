@@ -44,16 +44,16 @@ void L1TCaloTowerCreatorForTauHLT::produce( StreamID sid, Event& evt, const Even
   std::auto_ptr<CaloTowerCollection> cands( new CaloTowerCollection );
   cands->reserve( caloTowers->size() );
 
+  int idTau = 0;
   if (jetsgen.isValid()){ 
-    for (int ibx = jetsgen->getFirstBX(); ibx <= jetsgen->getLastBX(); ++ibx) {
-      for (auto myL1Jet = jetsgen->begin(0); myL1Jet != jetsgen->end(0); myL1Jet++){      
-        if(idTau == mTauId){
-          double Sum08 = 0.;
-          unsigned idx = 0;
-          for (; idx < caloTowers->size(); idx++) {
-            const CaloTower* cal = &((*caloTowers) [idx]);
-            bool isAccepted = false;
-            if (mVerbose == 2) {
+    for (auto myL1Jet = jetsgen->begin(0); myL1Jet != jetsgen->end(0); myL1Jet++){      
+      if(idTau == mTauId){
+        double Sum08 = 0.;
+        unsigned idx = 0;
+        for (; idx < caloTowers->size(); idx++) {
+          const CaloTower* cal = &((*caloTowers) [idx]);
+          bool isAccepted = false;
+          if (mVerbose == 2) {
               edm::LogInfo("JetDebugInfo") << "L1TCaloTowerCreatorForTauHLT::produce-> " << idx 
                                            << " tower et/eta/phi/e: "                 << cal->et()  << '/' 
                                                                                       << cal->eta() << '/' 
@@ -61,23 +61,22 @@ void L1TCaloTowerCreatorForTauHLT::produce( StreamID sid, Event& evt, const Even
                                                                                       << cal->energy() 
                                            << " is...";
               }
-            if (cal->et() >= mEtThreshold && cal->energy() >= mEThreshold ) {
-              math::PtEtaPhiELorentzVector p( cal->et(), cal->eta(), cal->phi(), cal->energy() );
-              double delta  = ROOT::Math::VectorUtil::DeltaR((*myL1Jet).p4().Vect(), p);
-              if(delta < mCone) {
-                isAccepted = true;
-                Sum08 += cal->et(); 
-                cands->push_back( *cal );
-              }
+          if (cal->et() >= mEtThreshold && cal->energy() >= mEThreshold ) {
+            math::PtEtaPhiELorentzVector p( cal->et(), cal->eta(), cal->phi(), cal->energy() );
+            double delta  = ROOT::Math::VectorUtil::DeltaR((*myL1Jet).p4().Vect(), p);
+            if(delta < mCone) {
+              isAccepted = true;
+              Sum08 += cal->et(); 
+              cands->push_back( *cal );
             }
-            if (mVerbose == 2){
+          }
+          if (mVerbose == 2){
               if (isAccepted) edm::LogInfo("JetDebugInfo") << "accepted \n";
               else edm::LogInfo("JetDebugInfo") << "rejected \n";
             }
-          }
         }
-        idTau++;
       }
+      idTau++;
     }
   } 
   else {
