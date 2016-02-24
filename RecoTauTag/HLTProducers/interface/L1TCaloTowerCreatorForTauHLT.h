@@ -1,7 +1,7 @@
-#ifndef CaloTowerCreator_CaloTowerCreatorForTauHLT_h
-#define CaloTowerCreator_CaloTowerCreatorForTauHLT_h
+#ifndef CaloTowerCreator_L1TCaloTowerCreatorForTauHLT_h
+#define CaloTowerCreator_L1TCaloTowerCreatorForTauHLT_h
 
-/** \class CaloTowerCreatorForTauHLT
+/** \class L1TCaloTowerCreatorForTauHLT
  *
  * Framework module that produces a collection
  * of calo towers in the region of interest for Tau HLT reconnstruction,
@@ -20,20 +20,19 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "DataFormats/CaloTowers/interface/CaloTower.h"
-#include "DataFormats/L1Trigger/interface/L1JetParticle.h"
-#include "DataFormats/L1Trigger/interface/L1JetParticleFwd.h"
+#include "DataFormats/L1Trigger/interface/Jet.h"
 #include <string>
 
 namespace edm {
   class ParameterSet;
 }
 
-class CaloTowerCreatorForTauHLT : public edm::global::EDProducer<> {
+class L1TCaloTowerCreatorForTauHLT : public edm::global::EDProducer<> {
  public:
   /// constructor from parameter set
-  CaloTowerCreatorForTauHLT( const edm::ParameterSet & );
+  L1TCaloTowerCreatorForTauHLT( const edm::ParameterSet & );
   /// destructor
-  ~CaloTowerCreatorForTauHLT();
+  ~L1TCaloTowerCreatorForTauHLT();
   /// 
   static void fillDescriptions( edm::ConfigurationDescriptions& desc );
 
@@ -48,7 +47,7 @@ class CaloTowerCreatorForTauHLT : public edm::global::EDProducer<> {
   /// use only towers in cone mCone around L1 candidate for regional jet reco
   const double mCone;
   /// label of tau trigger type analysis
-  const edm::EDGetTokenT<l1extra::L1JetParticleCollection> mTauTrigger_token;
+  const edm::EDGetTokenT<l1t::JetBxCollection>    mTauTrigger_token;
   /// imitator of L1 seeds
   //edm::InputTag ml1seeds;
   /// ET threshold

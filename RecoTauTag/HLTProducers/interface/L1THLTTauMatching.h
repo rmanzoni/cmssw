@@ -1,5 +1,5 @@
-#ifndef L1HLTTAUMATCHING_H
-#define L1HLTTAUMATCHING_H
+#ifndef L1THLTTauMatching_H
+#define L1THLTTauMatching_H
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -10,8 +10,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/L1Trigger/interface/L1JetParticle.h"
-#include "DataFormats/L1Trigger/interface/L1JetParticleFwd.h"
+#include "DataFormats/L1Trigger/interface/Tau.h"
+#include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/TauReco/interface/PFTauFwd.h"
 #include "DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h"
@@ -19,10 +19,10 @@
 
 #include <map>
 #include <vector>
-class L1HLTTauMatching: public edm::global::EDProducer<> {
+class L1THLTTauMatching: public edm::global::EDProducer<> {
  public:
-  explicit L1HLTTauMatching(const edm::ParameterSet&);
-  ~L1HLTTauMatching();
+  explicit L1THLTTauMatching(const edm::ParameterSet&);
+  ~L1THLTTauMatching();
   virtual void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
