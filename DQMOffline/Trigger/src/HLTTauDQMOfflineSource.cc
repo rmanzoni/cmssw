@@ -7,7 +7,6 @@
 using namespace std;
 using namespace edm;
 using namespace reco;
-using namespace l1extra;
 using namespace trigger;
 
 //
@@ -35,7 +34,9 @@ HLTTauDQMOfflineSource::HLTTauDQMOfflineSource( const edm::ParameterSet& ps ):
   doRefAnalysis_ = matching.getUntrackedParameter<bool>("doMatching");
 
   if(ps.exists("L1Plotter")) {
-    l1Plotter_.reset(new HLTTauDQML1Plotter(ps.getUntrackedParameter<edm::ParameterSet>("L1Plotter"), consumesCollector(),
+//     l1Plotter_.reset(new HLTTauDQML1Plotter(ps.getUntrackedParameter<edm::ParameterSet>("L1Plotter"), consumesCollector(),
+//                                             nPhiBins_, ptMax_, highPtMax_, doRefAnalysis_, l1MatchDr_, dqmBaseFolder_));
+    l1Plotter_.reset(new HLTTauDQML1TPlotter(ps.getUntrackedParameter<edm::ParameterSet>("L1Plotter"), consumesCollector(),
                                             nPhiBins_, ptMax_, highPtMax_, doRefAnalysis_, l1MatchDr_, dqmBaseFolder_));
   }
   if(ps.exists("PathSummaryPlotter")) {

@@ -29,17 +29,17 @@ HLTTauDQML1Plotter::HLTTauDQML1Plotter(const edm::ParameterSet& ps, edm::Consume
     return;
 
   //Process PSet
-  l1ExtraTaus_      = ps.getUntrackedParameter<edm::InputTag>("L1Taus");
-  l1ExtraTausToken_ = cc.consumes<l1extra::L1JetParticleCollection>(l1ExtraTaus_);
+  l1ExtraTaus_         = ps.getUntrackedParameter<edm::InputTag>("L1Taus"   );
   l1ExtraIsoTaus_      = ps.getUntrackedParameter<edm::InputTag>("L1IsoTaus");
-  l1ExtraIsoTausToken_ = cc.consumes<l1extra::L1JetParticleCollection>(l1ExtraIsoTaus_);
-  l1ExtraJets_      = ps.getUntrackedParameter<edm::InputTag>("L1Jets");
-  l1ExtraJetsToken_ = cc.consumes<l1extra::L1JetParticleCollection>(l1ExtraJets_);
-  l1ExtraMET_       = ps.getUntrackedParameter<edm::InputTag>("L1ETM");
-  l1ExtraMETToken_  = cc.consumes<l1extra::L1EtMissParticleCollection>(l1ExtraMET_);
-  l1JetMinEt_       = ps.getUntrackedParameter<double>("L1JetMinEt");
-  l1ETMMin_         = ps.getUntrackedParameter<double>("L1ETMMin");
-  configValid_ = true;
+  l1ExtraJets_         = ps.getUntrackedParameter<edm::InputTag>("L1Jets"   );
+  l1ExtraMET_          = ps.getUntrackedParameter<edm::InputTag>("L1ETM"    );
+  l1ExtraTausToken_    = cc.consumes<l1t::TauBxCollection>  (l1ExtraTaus_   );
+  l1ExtraIsoTausToken_ = cc.consumes<l1t::TauBxCollection>  (l1ExtraIsoTaus_);
+  l1ExtraJetsToken_    = cc.consumes<l1t::JetBxCollection>  (l1ExtraJets_   );
+  l1ExtraMETToken_     = cc.consumes<l1t::EtSumBxCollection>(l1ExtraMET_    );
+  l1JetMinEt_          = ps.getUntrackedParameter<double>("L1JetMinEt");
+  l1ETMMin_            = ps.getUntrackedParameter<double>("L1ETMMin");
+  configValid_         = true;
 }
 
 void HLTTauDQML1Plotter::bookHistograms(DQMStore::IBooker &iBooker) {
@@ -175,14 +175,14 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
     }
     
     //Analyze L1 Objects (Tau+Jets)
-    edm::Handle<l1extra::L1JetParticleCollection> taus;
-    edm::Handle<l1extra::L1JetParticleCollection> isotaus;
-    edm::Handle<l1extra::L1JetParticleCollection> jets;
-    edm::Handle<l1extra::L1EtMissParticleCollection> met;
-    iEvent.getByToken(l1ExtraTausToken_, taus);
+    edm::Handle<l1t::TauBxCollection>   taus   ;
+    edm::Handle<l1t::TauBxCollection>   isotaus;
+    edm::Handle<l1t::JetBxCollection>   jets   ;
+    edm::Handle<l1t::EtSumBxCollection> met    ;
+    iEvent.getByToken(l1ExtraTausToken_   , taus   );
     iEvent.getByToken(l1ExtraIsoTausToken_, isotaus);
-    iEvent.getByToken(l1ExtraJetsToken_, jets);
-    iEvent.getByToken(l1ExtraMETToken_, met);
+    iEvent.getByToken(l1ExtraJetsToken_   , jets   );
+    iEvent.getByToken(l1ExtraMETToken_    , met    );
     
     LVColl pathTaus;
     
@@ -192,58 +192,67 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
     LVColl l1jets;
     LVColl l1met;
 
-    if(taus.isValid()) {
-      for(l1extra::L1JetParticleCollection::const_iterator i = taus->begin(); i != taus->end(); ++i) {
-        l1taus.push_back(i->p4());
+    // any L1 tau, regardless of the isolation bit
+    if (tau.isValid()){ 
+      for (auto it = tau->begin(0); it != tau->end(0); it++){      
+        l1taus.push_back(it->p4());
         if(!doRefAnalysis_) {
-          l1tauEt_->Fill(i->et());
-          l1tauEta_->Fill(i->eta());
-          l1tauPhi_->Fill(i->phi());
-          pathTaus.push_back(i->p4());
+          l1tauEt_ ->Fill(it->et ());
+          l1tauEta_->Fill(it->eta());
+          l1tauPhi_->Fill(it->phi());
+          pathTaus.push_back(it->p4());
         }
       }
-    }
+    } 
     else {
       edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::analyze: unable to read L1 tau collection " << l1ExtraTaus_.encode();
     }
 
-    if(isotaus.isValid()) {
-      for(l1extra::L1JetParticleCollection::const_iterator i = isotaus->begin(); i != isotaus->end(); ++i) {
-        l1isotaus.push_back(i->p4());
+    // isolated L1 taus
+    if (isotaus.isValid()){ 
+      for (auto it = isotaus->begin(0); it != isotaus->end(0); it++){ 
+        if (!(it->iso)): continue; // filter out non isolated taus   
+        l1isotaus.push_back(it->p4());
         if(!doRefAnalysis_) {
-          l1isotauEt_->Fill(i->et());
-          l1isotauEta_->Fill(i->eta());
-          l1isotauPhi_->Fill(i->phi());
-          pathTaus.push_back(i->p4());
+          l1isotauEt_ ->Fill(it->et ());
+          l1isotauEta_->Fill(it->eta());
+          l1isotauPhi_->Fill(it->phi());
+          pathTaus.push_back(it->p4());
         }
       }
-    }
+    } 
     else {
       edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::analyze: unable to read L1 isotau collection " << l1ExtraIsoTaus_.encode();
     }
 
-    if(jets.isValid()) {
-      for(l1extra::L1JetParticleCollection::const_iterator i = jets->begin(); i != jets->end(); ++i) {
-        l1jets.push_back(i->p4());
+
+    // L1 jets
+    if (jet.isValid()){ 
+      for (auto it = jet->begin(0); it != jet->end(0); it++){      
+        l1jets.push_back(it->p4());
         if(!doRefAnalysis_) {
-          l1jetEt_->Fill(i->et());
-          if(i->et() >= l1JetMinEt_) {
-            l1jetEta_->Fill(i->eta());
-            l1jetPhi_->Fill(i->phi());
-            pathTaus.push_back(i->p4());
+          l1jetEt_->Fill(it->et());
+          if(it->et() >= l1JetMinEt_) {
+            l1jetEta_->Fill(it->eta());
+            l1jetPhi_->Fill(it->phi());
+            pathTaus.push_back(it->p4());
           }
-        }
+        }  
       }
-    }
+    } 
     else {
       edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::analyze: unable to read L1 jet collection " << l1ExtraJets_.encode();
     }
 
-    if(met.isValid() && met.product()->size() > 0) {
+    // L1 MET
+    if (sum.isValid()){ 
+      l1t::EtSumHelper hsum(sum);
       if(!doRefAnalysis_) {
-	if( met.product()->begin()->et() > l1ETMMin_) l1etmEt_->Fill(met.product()->begin()->et());
-      }
-    }
+        if(hsum.MissingEt() > l1ETMMin_){
+          l1etmEt_->Fill(hsum.MissingEt());
+        }
+      }      
+    } 
     else {
       edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::analyze: unable to read L1 met collection " << l1ExtraMET_.encode();
     }
