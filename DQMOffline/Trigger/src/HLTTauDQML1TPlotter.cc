@@ -1,4 +1,4 @@
-#include "DQMOffline/Trigger/interface/HLTTauDQML1Plotter.h"
+#include "DQMOffline/Trigger/interface/HLTTauDQML1TPlotter.h"
 
 #include "FWCore/Framework/interface/Event.h"
 
@@ -7,14 +7,14 @@
 namespace {
   double getMaxEta(int binsEta, double widthEta) {
     if(widthEta <= 0.0) {
-      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::HLTTauDQML1Plotter: EtaHistoBinWidth = " << widthEta << " <= 0, using default value 0.348 instead";
+      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1TPlotter::HLTTauDQML1TPlotter: EtaHistoBinWidth = " << widthEta << " <= 0, using default value 0.348 instead";
       widthEta = 0.348;
     }
     return binsEta/2*widthEta;
   }
 }
 
-HLTTauDQML1Plotter::HLTTauDQML1Plotter(const edm::ParameterSet& ps, edm::ConsumesCollector&& cc, int phibins, double maxpt, double maxhighpt, bool ref, double dr, const std::string& dqmBaseFolder):
+HLTTauDQML1TPlotter::HLTTauDQML1TPlotter(const edm::ParameterSet& ps, edm::ConsumesCollector&& cc, int phibins, double maxpt, double maxhighpt, bool ref, double dr, const std::string& dqmBaseFolder):
   HLTTauDQMPlotter(ps, dqmBaseFolder),
   doRefAnalysis_(ref),
   matchDeltaR_(dr),
@@ -42,7 +42,7 @@ HLTTauDQML1Plotter::HLTTauDQML1Plotter(const edm::ParameterSet& ps, edm::Consume
   configValid_         = true;
 }
 
-void HLTTauDQML1Plotter::bookHistograms(DQMStore::IBooker &iBooker) {
+void HLTTauDQML1TPlotter::bookHistograms(DQMStore::IBooker &iBooker) {
   if(!configValid_)
     return;
 
@@ -145,14 +145,14 @@ void HLTTauDQML1Plotter::bookHistograms(DQMStore::IBooker &iBooker) {
 }
 
 
-HLTTauDQML1Plotter::~HLTTauDQML1Plotter() {
+HLTTauDQML1TPlotter::~HLTTauDQML1TPlotter() {
 }
 
 //
 // member functions
 //
 
-void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup, const HLTTauDQMOfflineObjects& refC ) {
+void HLTTauDQML1TPlotter::analyze( const edm::Event& iEvent, const edm::EventSetup& iSetup, const HLTTauDQMOfflineObjects& refC ) {
     if ( doRefAnalysis_ ) {
         //Tau reference
         for ( LVColl::const_iterator iter = refC.taus.begin(); iter != refC.taus.end(); ++iter ) {
@@ -178,11 +178,11 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
     edm::Handle<l1t::TauBxCollection>   taus   ;
     edm::Handle<l1t::TauBxCollection>   isotaus;
     edm::Handle<l1t::JetBxCollection>   jets   ;
-    edm::Handle<l1t::EtSumBxCollection> met    ;
+    edm::Handle<l1t::EtSumBxCollection> sum    ;
     iEvent.getByToken(l1ExtraTausToken_   , taus   );
     iEvent.getByToken(l1ExtraIsoTausToken_, isotaus);
     iEvent.getByToken(l1ExtraJetsToken_   , jets   );
-    iEvent.getByToken(l1ExtraMETToken_    , met    );
+    iEvent.getByToken(l1ExtraMETToken_    , sum    );
     
     LVColl pathTaus;
     
@@ -193,8 +193,8 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
     LVColl l1met;
 
     // any L1 tau, regardless of the isolation bit
-    if (tau.isValid()){ 
-      for (auto it = tau->begin(0); it != tau->end(0); it++){      
+    if (taus.isValid()){ 
+      for (auto it = taus->begin(0); it != taus->end(0); it++){      
         l1taus.push_back(it->p4());
         if(!doRefAnalysis_) {
           l1tauEt_ ->Fill(it->et ());
@@ -205,13 +205,13 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
       }
     } 
     else {
-      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::analyze: unable to read L1 tau collection " << l1ExtraTaus_.encode();
+      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1TPlotter::analyze: unable to read L1 tau collection " << l1ExtraTaus_.encode();
     }
 
     // isolated L1 taus
     if (isotaus.isValid()){ 
       for (auto it = isotaus->begin(0); it != isotaus->end(0); it++){ 
-        if (!(it->iso)): continue; // filter out non isolated taus   
+        if (!(it->hwIso())) continue; // filter out non isolated taus http://cmslxr.fnal.gov/source/DataFormats/L1Trigger/interface/L1Candidate.h#0052
         l1isotaus.push_back(it->p4());
         if(!doRefAnalysis_) {
           l1isotauEt_ ->Fill(it->et ());
@@ -222,13 +222,13 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
       }
     } 
     else {
-      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::analyze: unable to read L1 isotau collection " << l1ExtraIsoTaus_.encode();
+      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1TPlotter::analyze: unable to read L1 isotau collection " << l1ExtraIsoTaus_.encode();
     }
 
 
     // L1 jets
-    if (jet.isValid()){ 
-      for (auto it = jet->begin(0); it != jet->end(0); it++){      
+    if (jets.isValid()){ 
+      for (auto it = jets->begin(0); it != jets->end(0); it++){      
         l1jets.push_back(it->p4());
         if(!doRefAnalysis_) {
           l1jetEt_->Fill(it->et());
@@ -241,7 +241,7 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
       }
     } 
     else {
-      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::analyze: unable to read L1 jet collection " << l1ExtraJets_.encode();
+      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1TPlotter::analyze: unable to read L1 jet collection " << l1ExtraJets_.encode();
     }
 
     // L1 MET
@@ -254,14 +254,14 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
       }      
     } 
     else {
-      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1Plotter::analyze: unable to read L1 met collection " << l1ExtraMET_.encode();
+      edm::LogWarning("HLTTauDQMOffline") << "HLTTauDQML1TPlotter::analyze: unable to read L1 met collection " << l1ExtraMET_.encode();
     }
 
     //Now do the efficiency matching
     if ( doRefAnalysis_ ) {
-        for ( LVColl::const_iterator i = refC.taus.begin(); i != refC.taus.end(); ++i ) {
-            std::pair<bool,LV> m = match(*i,l1taus,matchDeltaR_);
-            if ( m.first ) {
+      for ( LVColl::const_iterator i = refC.taus.begin(); i != refC.taus.end(); ++i ) {
+        std::pair<bool,LV> m = match(*i,l1taus,matchDeltaR_);
+        if ( m.first ) {
                 l1tauEt_->Fill(m.second.pt());
                 l1tauEta_->Fill(m.second.eta());
                 l1tauPhi_->Fill(m.second.phi());
@@ -275,11 +275,11 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
 
                 pathTaus.push_back(m.second);
             }
-        }
-        
-        for ( LVColl::const_iterator i = refC.taus.begin(); i != refC.taus.end(); ++i ) {
-            std::pair<bool,LV> m = match(*i,l1isotaus,matchDeltaR_);
-            if ( m.first ) {
+      }
+      
+      for ( LVColl::const_iterator i = refC.taus.begin(); i != refC.taus.end(); ++i ) {
+        std::pair<bool,LV> m = match(*i,l1isotaus,matchDeltaR_);
+        if ( m.first ) {
                 l1isotauEt_->Fill(m.second.pt());
                 l1isotauEta_->Fill(m.second.eta());  
                 l1isotauPhi_->Fill(m.second.phi());  
@@ -293,11 +293,11 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
     
                 pathTaus.push_back(m.second);
             }
-        }
+      }
 
-        for ( LVColl::const_iterator i = refC.taus.begin(); i != refC.taus.end(); ++i ) {
-            std::pair<bool,LV> m = match(*i,l1jets,matchDeltaR_);
-            if ( m.first ) {
+      for ( LVColl::const_iterator i = refC.taus.begin(); i != refC.taus.end(); ++i ) {
+        std::pair<bool,LV> m = match(*i,l1jets,matchDeltaR_);
+        if ( m.first ) {
                 l1jetEt_->Fill(m.second.pt());
                 if(m.second.pt() >= l1JetMinEt_) {
                   l1jetEta_->Fill(m.second.eta());
@@ -313,18 +313,18 @@ void HLTTauDQML1Plotter::analyze( const edm::Event& iEvent, const edm::EventSetu
                   pathTaus.push_back(m.second);
                 }
             }
-        }
+      }
 
-	if(met.isValid() && met.product()->size() > 0) {
-          l1etmEt_->Fill(met.product()->begin()->et());
-          l1etmPhi_->Fill(met.product()->begin()->phi());
-
-	  if( met.product()->begin()->et() > l1ETMMin_){
-            l1etmEtEffNum_->Fill(met.product()->begin()->et());
-	  }
-	}
-    }
-    
+      // L1 MET
+      if (sum.isValid()){ 
+        l1t::EtSumHelper hsum(sum);
+        l1etmEt_ ->Fill(hsum.MissingEt());
+        l1etmPhi_->Fill(hsum.MissingEtPhi());
+	    if( hsum.MissingEt() > l1ETMMin_){
+          l1etmEtEffNum_->Fill(hsum.MissingEt());
+	    }
+      }
+    }     
     
     //Fill the Threshold Monitoring
     if(pathTaus.size() > 1) std::sort(pathTaus.begin(), pathTaus.end(), [](const LV& a, const LV& b) { return a.pt() > b.pt(); });

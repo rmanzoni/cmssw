@@ -13,7 +13,8 @@
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 
 //Plotters
-#include "DQMOffline/Trigger/interface/HLTTauDQML1Plotter.h"
+// #include "DQMOffline/Trigger/interface/HLTTauDQML1Plotter.h"
+#include "DQMOffline/Trigger/interface/HLTTauDQML1TPlotter.h"
 #include "DQMOffline/Trigger/interface/HLTTauDQMPathPlotter.h"
 #include "DQMOffline/Trigger/interface/HLTTauDQMPathSummaryPlotter.h"
 
@@ -61,7 +62,8 @@ private:
     const int prescaleEvt_;     //every n events 
     
     // Plotters
-    std::unique_ptr<HLTTauDQML1Plotter> l1Plotter_;
+//     std::unique_ptr<HLTTauDQML1Plotter> l1Plotter_;
+    std::unique_ptr<HLTTauDQML1TPlotter> l1Plotter_;
     std::vector<HLTTauDQMPathPlotter> pathPlotters_;
     std::unique_ptr<HLTTauDQMPathSummaryPlotter> pathSummaryPlotter_;
 };
