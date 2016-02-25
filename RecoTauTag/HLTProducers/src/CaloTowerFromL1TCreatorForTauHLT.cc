@@ -19,10 +19,11 @@ using namespace std ;
 
 CaloTowerFromL1TCreatorForTauHLT::CaloTowerFromL1TCreatorForTauHLT( const ParameterSet & p ) 
   :
+  mBX                                                 (p.getUntrackedParameter<int> ("BX"             , 0) ),
   mVerbose                                            (p.getUntrackedParameter<int> ("verbose"        , 0) ),
   mtowers_token     (consumes<CaloTowerCollection>    (p.getParameter<InputTag>     ("towers"            ))),
   mCone                                               (p.getParameter<double>       ("UseTowersInCone"   ) ),
-  mTauTrigger_token (consumes<l1t::JetBxCollection>   (p.getParameter<InputTag>     ("TauTrigger"        ))),
+  mTauTrigger_token (consumes<l1t::TauBxCollection>   (p.getParameter<InputTag>     ("TauTrigger"        ))),
   mEtThreshold                                        (p.getParameter<double>       ("minimumEt"         ) ),
   mEThreshold                                         (p.getParameter<double>       ("minimumE"          ) ),
   mTauId                                              (p.getParameter<int>          ("TauId"             ) )
@@ -38,7 +39,7 @@ void CaloTowerFromL1TCreatorForTauHLT::produce( StreamID sid, Event& evt, const 
   evt.getByToken( mtowers_token, caloTowers );
 
   // imitate L1 seeds
-  edm::Handle<l1t::JetBxCollection> jetsgen;
+  edm::Handle<l1t::TauBxCollection> jetsgen;
   evt.getByToken( mTauTrigger_token, jetsgen);
 
   std::auto_ptr<CaloTowerCollection> cands( new CaloTowerCollection );
@@ -46,10 +47,10 @@ void CaloTowerFromL1TCreatorForTauHLT::produce( StreamID sid, Event& evt, const 
 
   int idTau = 0;
   if (jetsgen.isValid()){ 
-    for (auto myL1Jet = jetsgen->begin(0); myL1Jet != jetsgen->end(0); myL1Jet++){      
+    for (auto myL1Jet = jetsgen->begin(mBX); myL1Jet != jetsgen->end(mBX); myL1Jet++){      
       if(idTau == mTauId){
-        double Sum08 = 0.;
-        unsigned idx = 0;
+        double   Sum08 = 0.;
+        unsigned idx   = 0 ;
         for (; idx < caloTowers->size(); idx++) {
           const CaloTower* cal = &((*caloTowers) [idx]);
           bool isAccepted = false;
@@ -91,13 +92,14 @@ void CaloTowerFromL1TCreatorForTauHLT::fillDescriptions( edm::ConfigurationDescr
 
   edm::ParameterSetDescription aDesc;
 
-  aDesc.add<edm::InputTag>("TauTrigger"     , edm::InputTag("l1extraParticles","Tau"))->setComment("L1ExtraJet collection for seeding"               );
-  aDesc.add<edm::InputTag>("towers"         , edm::InputTag("towerMaker"            ))->setComment("Input tower collection"                          );
-  aDesc.add<int>          ("TauId"          , 0                                      )->setComment("Item from L1ExtraJet collection used for seeding");
-  aDesc.add<double>       ("UseTowersInCone", 0.8                                    )->setComment("Radius of cone around seed"                      );
-  aDesc.add<double>       ("minimumE"       , 0.8                                    )->setComment("Minimum tower energy"                            );
-  aDesc.add<double>       ("minimumEt"      , 0.5                                    )->setComment("Minimum tower ET"                                );
-  aDesc.addUntracked<int> ("verbose"        , 0                                      )->setComment("Verbosity level; 0=silent"                       );
+  aDesc.add<edm::InputTag>("TauTrigger"     , edm::InputTag("l1extraParticles","Tau"))->setComment("L1ExtraJet collection for seeding"                            );
+  aDesc.add<edm::InputTag>("towers"         , edm::InputTag("towerMaker"            ))->setComment("Input tower collection"                                       );
+  aDesc.add<int>          ("TauId"          , 0                                      )->setComment("Item from L1ExtraJet collection used for seeding"             );
+  aDesc.add<double>       ("UseTowersInCone", 0.8                                    )->setComment("Radius of cone around seed"                                   );
+  aDesc.add<double>       ("minimumE"       , 0.8                                    )->setComment("Minimum tower energy"                                         );
+  aDesc.add<double>       ("minimumEt"      , 0.5                                    )->setComment("Minimum tower ET"                                             );
+  aDesc.addUntracked<int> ("verbose"        , 0                                      )->setComment("Verbosity level; 0=silent"                                    );
+  aDesc.addUntracked<int> ("BX"             , 0                                      )->setComment("Set bunch crossing; 0 = in time, -1 = previous, 1 = following");
 
   desc.add                ("caloTowerMakerHLT", aDesc);
   desc.setComment         ("Produce tower collection around L1ExtraJetParticle seed.");

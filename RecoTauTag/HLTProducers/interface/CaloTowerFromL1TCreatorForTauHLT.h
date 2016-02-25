@@ -20,7 +20,7 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "DataFormats/CaloTowers/interface/CaloTower.h"
-#include "DataFormats/L1Trigger/interface/Jet.h"
+#include "DataFormats/L1Trigger/interface/Tau.h"
 #include <string>
 
 namespace edm {
@@ -40,6 +40,8 @@ class CaloTowerFromL1TCreatorForTauHLT : public edm::global::EDProducer<> {
   /// process one event
   void produce( edm::StreamID sid, edm::Event& evt, const edm::EventSetup& stp ) const override;
 
+  /// bunch crossing
+  const int mBX;
   /// verbosity
   const int mVerbose;
   /// label of source collection
@@ -47,7 +49,7 @@ class CaloTowerFromL1TCreatorForTauHLT : public edm::global::EDProducer<> {
   /// use only towers in cone mCone around L1 candidate for regional jet reco
   const double mCone;
   /// label of tau trigger type analysis
-  const edm::EDGetTokenT<l1t::JetBxCollection>    mTauTrigger_token;
+  const edm::EDGetTokenT<l1t::TauBxCollection> mTauTrigger_token;
   /// imitator of L1 seeds
   //edm::InputTag ml1seeds;
   /// ET threshold
