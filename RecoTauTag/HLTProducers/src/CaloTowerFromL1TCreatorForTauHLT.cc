@@ -8,7 +8,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "RecoTauTag/HLTProducers/interface/L1TCaloTowerCreatorForTauHLT.h"
+#include "RecoTauTag/HLTProducers/interface/CaloTowerFromL1TCreatorForTauHLT.h"
 // Math
 #include "Math/GenVector/VectorUtil.h"
 #include <cmath>
@@ -17,7 +17,7 @@ using namespace edm ;
 using namespace reco;
 using namespace std ;
 
-L1TCaloTowerCreatorForTauHLT::L1TCaloTowerCreatorForTauHLT( const ParameterSet & p ) 
+CaloTowerFromL1TCreatorForTauHLT::CaloTowerFromL1TCreatorForTauHLT( const ParameterSet & p ) 
   :
   mVerbose                                            (p.getUntrackedParameter<int> ("verbose"        , 0) ),
   mtowers_token     (consumes<CaloTowerCollection>    (p.getParameter<InputTag>     ("towers"            ))),
@@ -30,10 +30,10 @@ L1TCaloTowerCreatorForTauHLT::L1TCaloTowerCreatorForTauHLT( const ParameterSet &
   produces<CaloTowerCollection>();
 }
 
-L1TCaloTowerCreatorForTauHLT::~L1TCaloTowerCreatorForTauHLT() {
+CaloTowerFromL1TCreatorForTauHLT::~CaloTowerFromL1TCreatorForTauHLT() {
 }
 
-void L1TCaloTowerCreatorForTauHLT::produce( StreamID sid, Event& evt, const EventSetup& stp ) const {
+void CaloTowerFromL1TCreatorForTauHLT::produce( StreamID sid, Event& evt, const EventSetup& stp ) const {
   edm::Handle<CaloTowerCollection> caloTowers;
   evt.getByToken( mtowers_token, caloTowers );
 
@@ -54,11 +54,11 @@ void L1TCaloTowerCreatorForTauHLT::produce( StreamID sid, Event& evt, const Even
           const CaloTower* cal = &((*caloTowers) [idx]);
           bool isAccepted = false;
           if (mVerbose == 2) {
-              edm::LogInfo("JetDebugInfo") << "L1TCaloTowerCreatorForTauHLT::produce-> " << idx 
-                                           << " tower et/eta/phi/e: "                 << cal->et()  << '/' 
-                                                                                      << cal->eta() << '/' 
-                                                                                      << cal->phi() << '/' 
-                                                                                      << cal->energy() 
+              edm::LogInfo("JetDebugInfo") << "CaloTowerFromL1TCreatorForTauHLT::produce-> " << idx 
+                                           << " tower et/eta/phi/e: "                        << cal->et()  << '/' 
+                                                                                             << cal->eta() << '/' 
+                                                                                             << cal->phi() << '/' 
+                                                                                             << cal->energy() 
                                            << " is...";
               }
           if (cal->et() >= mEtThreshold && cal->energy() >= mEThreshold ) {
@@ -87,7 +87,7 @@ void L1TCaloTowerCreatorForTauHLT::produce( StreamID sid, Event& evt, const Even
   
 }
 
-void L1TCaloTowerCreatorForTauHLT::fillDescriptions( edm::ConfigurationDescriptions & desc ) {
+void CaloTowerFromL1TCreatorForTauHLT::fillDescriptions( edm::ConfigurationDescriptions & desc ) {
 
   edm::ParameterSetDescription aDesc;
 

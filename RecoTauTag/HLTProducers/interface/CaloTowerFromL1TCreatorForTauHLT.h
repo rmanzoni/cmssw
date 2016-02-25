@@ -1,7 +1,7 @@
-#ifndef CaloTowerCreator_L1TCaloTowerCreatorForTauHLT_h
-#define CaloTowerCreator_L1TCaloTowerCreatorForTauHLT_h
+#ifndef CaloTowerCreator_CaloTowerFromL1TCreatorForTauHLT_h
+#define CaloTowerCreator_CaloTowerFromL1TCreatorForTauHLT_h
 
-/** \class L1TCaloTowerCreatorForTauHLT
+/** \class CaloTowerFromL1TCreatorForTauHLT
  *
  * Framework module that produces a collection
  * of calo towers in the region of interest for Tau HLT reconnstruction,
@@ -27,12 +27,12 @@ namespace edm {
   class ParameterSet;
 }
 
-class L1TCaloTowerCreatorForTauHLT : public edm::global::EDProducer<> {
+class CaloTowerFromL1TCreatorForTauHLT : public edm::global::EDProducer<> {
  public:
   /// constructor from parameter set
-  L1TCaloTowerCreatorForTauHLT( const edm::ParameterSet & );
+  CaloTowerFromL1TCreatorForTauHLT( const edm::ParameterSet & );
   /// destructor
-  ~L1TCaloTowerCreatorForTauHLT();
+  ~CaloTowerFromL1TCreatorForTauHLT();
   /// 
   static void fillDescriptions( edm::ConfigurationDescriptions& desc );
 
