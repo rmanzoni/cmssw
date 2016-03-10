@@ -60,7 +60,7 @@ neutralCandidatePUIDJets::neutralCandidatePUIDJets(const edm::ParameterSet& iCon
   // user defined jetPUIDCut cut
   jetPUIDCut_[0][0] = -0.2; jetPUIDCut_[0][1] = -0.3; jetPUIDCut_[0][2] = -0.5; jetPUIDCut_[0][3] = -0.5;
   jetPUIDCut_[1][0] = -0.2; jetPUIDCut_[1][1] = -0.2; jetPUIDCut_[1][2] = -0.5; jetPUIDCut_[1][3] = -0.3;
-  jetPUIDCut_[0][2] = -0.2; jetPUIDCut_[1][2] = -0.2; jetPUIDCut_[2][2] = -0.2; jetPUIDCut_[3][2] =  0.1;
+  jetPUIDCut_[2][0] = -0.2; jetPUIDCut_[2][1] = -0.2; jetPUIDCut_[2][2] = -0.2; jetPUIDCut_[2][3] =  0.1;
   jetPUIDCut_[3][0] = -0.2; jetPUIDCut_[3][1] = -0.2; jetPUIDCut_[3][2] =  0. ; jetPUIDCut_[3][3] =  0.2; 
   
 
