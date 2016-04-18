@@ -85,8 +85,6 @@ FilterL1TTaus::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   int bxFirst = itaus->getFirstBX();
   int bxLast  = itaus->getLastBX ();
 
-  //LogDebug("L1TDebug") << "First BX=" << bxFirst << ", last BX=" << bxLast << std::endl;
-
   //outputs
   std::auto_ptr<l1t::TauBxCollection> ftaus (new l1t::TauBxCollection(0, bxFirst, bxLast));
 
@@ -96,12 +94,12 @@ FilterL1TTaus::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::cout << "bx " << ibx;  
     for(auto tau = itaus->begin(ibx); tau != itaus->end(ibx); ++tau, ++i){
       
+      /*
       std::cout << "\ttau pt  " << tau->pt()  
                 << "\ttau iso " << tau->hwIso() 
                 << "\ttau eta " << tau->eta() 
                 << "\ttau #   " << i            << std::endl;
-      
-      
+      //*/
       if (tau->pt()  < minPt_)        continue;
       if (tau->hwIso() < iso_  )      continue;
       if (fabs(tau->eta()) > maxEta_) continue;
@@ -110,52 +108,6 @@ FilterL1TTaus::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       ftaus->push_back(ibx, *tau);
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  int bx1First = ftaus->getFirstBX();
-  int bx1Last  = ftaus->getLastBX ();
-
-  std::cout << "=====> passed taus " << std::endl;  
-
-  // loop over BX
-  for(int ibx = bx1First; ibx < bx1Last+1; ++ibx) {
-    int i = 1;
-    std::cout << "bx " << ibx;  
-    for(auto tau = ftaus->begin(ibx); tau != ftaus->end(ibx); ++tau, ++i){
-      
-      std::cout << "\ttau pt  " << tau->pt()  
-                << "\ttau iso " << tau->hwIso() 
-                << "\ttau eta " << tau->eta() 
-                << "\ttau #   " << i            << std::endl;
-    }
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
   iEvent.put(ftaus);
 }
 
