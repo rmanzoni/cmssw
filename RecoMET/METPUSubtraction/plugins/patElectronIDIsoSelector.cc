@@ -7,7 +7,9 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
- 
+
+#include "FWCore/Framework/interface/stream/EDProducer.h"
+
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
@@ -244,7 +246,7 @@ void patElectronIDIsoSelector::produce(edm::Event& iEvent,const edm::EventSetup&
   size_t electronIndex = 0;
   pat::ElectronCollection::const_iterator itElectron = ElectronCollectionHandle->begin();
 
-  auto_ptr<pat::ElectronCollection> electronColl(new vector<pat::Electron>);
+  auto electronColl = std::make_unique<std::vector<pat::Electron>>();
 
   for( ; itElectron != ElectronCollectionHandle->end(); itElectron++, electronIndex++){
 
@@ -313,8 +315,7 @@ void patElectronIDIsoSelector::produce(edm::Event& iEvent,const edm::EventSetup&
     electronColl->push_back(newElectron);
   }
 
-  iEvent.put(electronColl);
-
+  iEvent.put(std::move(electronColl));
 
 }
 

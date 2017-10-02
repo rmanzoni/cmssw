@@ -106,12 +106,12 @@ void neutralCandidatePUIDJets::produce(edm::Event& iEvent, const edm::EventSetup
   edm::Handle<reco::CandidateView> candCollection;
   iEvent.getByToken(srcCandidatesToken_,candCollection);
 
-  std::auto_ptr<edm::PtrVector<reco::Candidate> > neutralParticlesPVJets(new edm::PtrVector<reco::Candidate>);
-  std::auto_ptr<edm::PtrVector<reco::Candidate> > neutralParticlesPUJets(new edm::PtrVector<reco::Candidate>);
-  std::auto_ptr<edm::PtrVector<reco::Candidate> > neutralParticlesUnclustered(new edm::PtrVector<reco::Candidate>);
+  auto neutralParticlesPVJets = std::make_unique<edm::PtrVector<reco::Candidate>>();
+  auto neutralParticlesPUJets = std::make_unique<edm::PtrVector<reco::Candidate>>();
+  auto neutralParticlesUnclustered = std::make_unique<edm::PtrVector<reco::Candidate>>();
 
-  std::auto_ptr<pat::JetCollection> PUJets(new pat::JetCollection);
-  std::auto_ptr<pat::JetCollection> PVJets(new pat::JetCollection);
+  auto PUJets = std::make_unique<pat::JetCollection>();
+  auto PVJets = std::make_unique<pat::JetCollection>();
 
   // loop on jets
   for(auto jet : *jetCollection){
@@ -214,12 +214,11 @@ void neutralCandidatePUIDJets::produce(edm::Event& iEvent, const edm::EventSetup
     indexColl++;
   }
 
-  
-  iEvent.put(neutralParticlesPVJets,neutralParticlesPVJets_);
-  iEvent.put(neutralParticlesPUJets,neutralParticlesPUJets_);
-  iEvent.put(neutralParticlesUnclustered,neutralParticlesUnclustered_);
-  iEvent.put(PUJets,PUJets_);
-  iEvent.put(PVJets,PVJets_);
+  iEvent.put(std::move(neutralParticlesPVJets), neutralParticlesPVJets_);
+  iEvent.put(std::move(neutralParticlesPUJets), neutralParticlesPUJets_);
+  iEvent.put(std::move(neutralParticlesUnclustered), neutralParticlesUnclustered_);
+  iEvent.put(std::move(PUJets), PUJets_);
+  iEvent.put(std::move(PVJets), PVJets_);
 
 }
 

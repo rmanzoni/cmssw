@@ -3,10 +3,12 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
- 
+
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+
+#include "FWCore/Framework/interface/stream/EDProducer.h"
  
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
@@ -239,7 +241,7 @@ void patMuonIDIsoSelector::produce(edm::Event& iEvent,const edm::EventSetup& iSe
   size_t muonIndex = 0;
   pat::MuonCollection::const_iterator itMuon = MuonCollectionHandle->begin();
 
-  auto_ptr<pat::MuonCollection> muonColl(new vector<pat::Muon>);
+  auto muonColl = std::make_unique<std::vector<pat::Muon>>();
 
   for( ; itMuon != MuonCollectionHandle->end(); itMuon++, muonIndex++){
 
@@ -342,8 +344,7 @@ void patMuonIDIsoSelector::produce(edm::Event& iEvent,const edm::EventSetup& iSe
     muonColl->push_back(newMuon);
   }
 
-  iEvent.put(muonColl);
-
+  iEvent.put(std::move(muonColl));
 
 }
 

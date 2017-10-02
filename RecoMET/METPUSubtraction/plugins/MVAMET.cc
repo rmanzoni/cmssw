@@ -337,15 +337,15 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
 
   
   // create output collections
-  std::auto_ptr<pat::METCollection> recoilpatMETCollection(new pat::METCollection());
-  std::auto_ptr<pat::METCollection> patMETCollection(new pat::METCollection());
+  auto recoilpatMETCollection = std::make_unique<pat::METCollection>();
+  auto patMETCollection = std::make_unique<pat::METCollection>();
 
   // stop execution if no recoiling object has been found
   if(Bosons_.size() == 0)
   {
     if(saveMap_)
       saveMap(evt);
-    evt.put(patMETCollection,mvaMETLabel_);
+    evt.put(std::move(patMETCollection), mvaMETLabel_);
     return;
   }
 
@@ -492,21 +492,23 @@ void MVAMET::produce(edm::Event& evt, const edm::EventSetup& es){
    for(const auto & entry : var_)
      std::cout << entry.first << " : " << entry.second << std::endl;
   }
-  evt.put(patMETCollection, mvaMETLabel_);
+
+  evt.put(std::move(patMETCollection), mvaMETLabel_);
+
 }
 
 void MVAMET::saveMap(edm::Event& evt)
 {
-  std::auto_ptr<std::vector<std::string>> variableNames(new std::vector<std::string>);
-  std::auto_ptr<std::vector<Float_t> > variables(new std::vector<Float_t>);
+  auto variableNames = std::make_unique<std::vector<std::string>>();
+  auto variables = std::make_unique<std::vector<Float_t>>();
 
   for(const auto & entry : var_){
     variableNames->push_back(entry.first);
     variables->push_back(entry.second);
   }
 
-  evt.put(variableNames);
-  evt.put(variables);
+  evt.put(std::move(variableNames));
+  evt.put(std::move(variables));
 }
 
 void MVAMET::addToMap(const metPlus &recoil, const recoilingBoson &Z)
