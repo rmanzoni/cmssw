@@ -197,7 +197,8 @@ class MVAMET : public edm::stream::EDProducer<> {
   metPlus calculateRecoil(metPlus* MET, const recoilingBoson &Z, edm::Event& evt);
   void TagZ();
 private:
-  void doCombinations(int offset, int k);
+//   void doCombinations(int offset, int k);
+  void doCombinations(int N, int K);
   void unpackCompositeCands(edm::Event& evt);
   void saveMap(edm::Event& evt);
   void calculateRecoilingObjects(edm::Event& evt, const pat::MuonCollection&, const pat::TauCollection&, const pat::ElectronCollection&);

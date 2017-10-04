@@ -101,21 +101,40 @@ metPlus MVAMET::calculateRecoil(metPlus* MET, const recoilingBoson &Z, edm::Even
     return Recoil;
 }
 
-void MVAMET::doCombinations(int offset, int k)
-{ 
-  if (k == 0)
-  {
-    combinations_.push_back(combination_);
-    combination_.pop_back();
-    return;
-  }
-  for (size_t i = offset; i <= allLeptons_.size() - k; ++i)
-  {
-    combination_.push_back(allLeptons_[i]);
-    doCombinations(i+1, k-1);
-  }
-  combination_.clear();
+// void MVAMET::doCombinations(int offset, int k)
+// { 
+//   if (k == 0)
+//   {
+//     combinations_.push_back(combination_);
+//     combination_.pop_back();
+//     return;
+//   }
+//   for (size_t i = offset; i <= allLeptons_.size() - k; ++i)
+//   {
+//     combination_.push_back(allLeptons_[i]);
+//     doCombinations(i+1, k-1);
+//   }
+//   combination_.clear();
+// }
+
+void MVAMET::doCombinations(int N, int K)
+{
+    std::string bitmask(K, 1); // K leading 1's
+    bitmask.resize(N, 0); // N-K trailing 0's
+ 
+    // print integers and permute bitmask
+    do {
+        for (int i = 0; i < N; ++i) // [0..N-1] integers
+        {
+            if (bitmask[i]) combination_.push_back(allLeptons_[i]);
+        }
+        combinations_.push_back(combination_);
+        combination_.clear();
+    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
 }
+ 
+
+
 
 void MVAMET::unpackCompositeCands(edm::Event& evt)
 {
@@ -214,7 +233,8 @@ void MVAMET::calculateRecoilingObjects(edm::Event &evt, const pat::MuonCollectio
     unpackCompositeCands(evt);
 
   else if(allLeptons_.size() >= combineNLeptons_)
-    doCombinations(0, combineNLeptons_);
+//     doCombinations(0, combineNLeptons_);
+    doCombinations(allLeptons_.size(), combineNLeptons_);
 
   if(debug_)
     std::cout << allLeptons_.size() << " lead to " << combinations_.size();
@@ -228,8 +248,10 @@ void MVAMET::calculateRecoilingObjects(edm::Event &evt, const pat::MuonCollectio
   for(auto leptonpair: combinations_)
   {
     recoilingBoson Z;
+    // std::cout << __LINE__ << "]\t start looping on the leptons" << std::endl;
     for(auto lepton : leptonpair)
     {
+      // std::cout << __LINE__ << "]\t\t pt, eta, phi, pdgID\t" << lepton->pt() << "\t" << lepton->eta() << "\t" << lepton->phi() << "\t" << lepton->pdgId() << "\t" << std::endl;
       if(abs(lepton->pdgId()) == 13)
         handleMuons( lepton, Z, muCollection);
       else if(abs(lepton->pdgId()) == 15)
