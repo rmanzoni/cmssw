@@ -756,7 +756,7 @@ class TauIDEmbedder(object):
             self.process.deepTau2017v2p1 = self.cms.EDProducer("DeepTauId",
                 electrons                = self.cms.InputTag('slimmedElectrons'),
                 muons                    = self.cms.InputTag('slimmedMuons'),
-                taus                     = self.cms.InputTag('slimmedTaus'),
+                taus                     = self.cms.InputTag(self.inputTaus),
                 pfcands                  = self.cms.InputTag('packedPFCandidates'),
                 vertices                 = self.cms.InputTag('offlineSlimmedPrimaryVertices'),
                 rho                      = self.cms.InputTag('fixedGridRhoAll'),
