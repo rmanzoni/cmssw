@@ -1,9 +1,8 @@
 from __future__ import print_function
-from __future__ import absolute_import
 # Copyright (C) 2014 Colin Bernet
 # https://github.com/cbernet/heppy/blob/master/LICENSE
 
-from .weight import Weight
+from weight import Weight
 import copy
 import glob
 import six
@@ -44,7 +43,7 @@ class CFG(object):
         header = '{type}: {name}'.format( type=self.__class__.__name__,
                                           name=self.name)
         varlines = ['\t{var:<15}:   {value}'.format(var=var, value=value) \
-                    for var,value in sorted(vars(six.iteritems(self))) \
+                    for var,value in sorted(six.iteritems(vars(self))) \
                     if var is not 'name']
         all = [ header ]
         all.extend(varlines)

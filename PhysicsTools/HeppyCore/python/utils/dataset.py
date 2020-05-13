@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from __future__ import absolute_import
-from builtins import range
 import os
 import pprint
 import re
 import pickle
 import sys
 
-from .castorBaseDir import castorBaseDir
-from . import eostools as castortools
+from castorBaseDir import castorBaseDir
+import eostools as castortools
 import fnmatch
 import six
 
@@ -143,7 +141,7 @@ class CMSDataset( BaseDataset ):
             else:
                 print("WARNING: queries with run ranges are slow in DAS")
                 query += "   run between [%s,%s]" % ( self.run_range[0],self.run_range[1] )
-        dbs='das_client.py --query="file %s=%s"'%(qwhat,query)
+        dbs='dasgoclient --query="file %s=%s"'%(qwhat,query)
         if begin >= 0:
             dbs += ' --index %d' % begin
         if end >= 0:
@@ -171,7 +169,7 @@ class CMSDataset( BaseDataset ):
         if num_files > limit:
             num_steps = int(num_files/limit)+1
             self.files = []
-            for i in range(num_steps):
+            for i in xrange(num_steps):
                 DBSFiles=self.buildListOfFilesDBS(pattern,
                                                   i*limit,
                                                   ((i+1)*limit)-1)
@@ -190,7 +188,7 @@ class CMSDataset( BaseDataset ):
             else:
                 print("WARNING: queries with run ranges are slow in DAS")
                 query = "%s run between [%d, %d]" % (query,runmin if runmin > 0 else 1, runmax if runmax > 0 else 999999)
-        dbs='das_client.py --query="summary %s=%s"'%(qwhat,query)
+        dbs='dasgoclient --query="summary %s=%s"'%(qwhat,query)
         dbsOut = os.popen(dbs).readlines()
 
         entries = []
@@ -213,7 +211,7 @@ class CMSDataset( BaseDataset ):
             else:
                 print("WARNING: queries with run ranges are slow in DAS")
                 query = "%s run between [%d, %d]" % (query,runmin if runmin > 0 else 1, runmax if runmax > 0 else 999999)
-        dbs='das_client.py --query="summary %s=%s"'%(qwhat,query)
+        dbs='dasgoclient --query="summary %s=%s"'%(qwhat,query)
         dbsOut = os.popen(dbs).readlines()
 
         entries = []
@@ -289,7 +287,7 @@ class Dataset( BaseDataset ):
         file_mask = castortools.matchingFiles(self.castorDir, '^%s_.*\.txt$' % mask)
         if file_mask:
             # here to avoid circular dependency
-            from .edmIntegrityCheck import PublishToFileSystem
+            from edmIntegrityCheck import PublishToFileSystem
             p = PublishToFileSystem(mask)
             report = p.get(self.castorDir)
             if report is not None and report:
@@ -342,7 +340,7 @@ class PrivateDataset ( BaseDataset ):
     def buildListOfFilesDBS(self, name, dbsInstance):
         entries = self.findPrimaryDatasetNumFiles(name, dbsInstance, -1, -1)
         files = []
-        dbs = 'das_client.py --query="file dataset=%s instance=prod/%s" --limit=%s' % (name, dbsInstance, entries)
+        dbs = 'dasgoclient --query="file dataset=%s instance=prod/%s" --limit=%s' % (name, dbsInstance, entries)
         dbsOut = os.popen(dbs)
         for line in dbsOut:
             if line.find('/store')==-1:
@@ -368,7 +366,7 @@ class PrivateDataset ( BaseDataset ):
             else:
                 print("WARNING: queries with run ranges are slow in DAS")
                 query = "%s run between [%d, %d]" % (query,runmin if runmin > 0 else 1, runmax if runmax > 0 else 999999)
-        dbs='das_client.py --query="summary %s=%s instance=prod/%s"'%(qwhat, query, dbsInstance)
+        dbs='dasgoclient --query="summary %s=%s instance=prod/%s"'%(qwhat, query, dbsInstance)
         dbsOut = os.popen(dbs).readlines()
 
         entries = []
@@ -392,7 +390,7 @@ class PrivateDataset ( BaseDataset ):
             else:
                 print("WARNING: queries with run ranges are slow in DAS")
                 query = "%s run between [%d, %d]" % (query,runmin if runmin > 0 else 1, runmax if runmax > 0 else 999999)
-        dbs='das_client.py --query="summary %s=%s instance=prod/%s"'%(qwhat, query, dbsInstance)
+        dbs='dasgoclient --query="summary %s=%s instance=prod/%s"'%(qwhat, query, dbsInstance)
         dbsOut = os.popen(dbs).readlines()
         
         entries = []

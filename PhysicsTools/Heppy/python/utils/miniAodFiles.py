@@ -41,12 +41,30 @@ def miniAodFiles():
             ]
     elif (big,medium)==(8,0):
         files=[
-            '/store/relval/CMSSW_8_0_3/RelValZMM_13/MINIAODSIM/80X_mcRun2_asymptotic_2016_v3_gs7120p2NewGTv3-v1/00000/16B9D3D7-C6EF-E511-8EA2-0025905A60FE.root',
-            '/store/relval/CMSSW_8_0_3/RelValZMM_13/MINIAODSIM/80X_mcRun2_asymptotic_2016_v3_gs7120p2NewGTv3-v1/00000/3E6582DC-C6EF-E511-A781-0CC47A4D7664.root'
+            '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0693E0E7-97BE-E611-B32F-0CC47A78A3D8.root',
+            '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/0806AB92-99BE-E611-9ECD-0025905A6138.root',
+            '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/165F54A0-A3BE-E611-B3F7-0025905A606A.root',
+            '/store/mc/RunIISummer16MiniAODv2/TT_TuneCUETP8M2T4_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/18E31463-B3BE-E611-B6A3-0CC47A4D7678.root',
             ]
+    elif (big,medium)==(9,2):
+        files=[
+            '/store/relval/CMSSW_9_2_4/RelValTTbar_13/MINIAODSIM/PU25ns_92X_upgrade2017_realistic_v2-v1/00000/A6E29287-535C-E711-B579-0CC47A4D7668.root',
+            '/store/relval/CMSSW_9_2_4/RelValTTbar_13/MINIAODSIM/PU25ns_92X_upgrade2017_realistic_v2-v1/00000/B6BE639D-535C-E711-8689-0CC47A4D7606.root',
+            ]
+    elif (big,medium)==(9,4):
+        files=[
+            '/store/relval/CMSSW_9_4_0/RelValTTbar_13/MINIAODSIM/PU25ns_94X_mc2017_realistic_v10-v1/10000/6A3683FD-A7CA-E711-AC02-0CC47A7C361E.root',
+            '/store/relval/CMSSW_9_4_0/RelValTTbar_13/MINIAODSIM/PU25ns_94X_mc2017_realistic_v10-v1/10000/BAE308FD-A7CA-E711-8DC4-0CC47A4C8E16.root',
+            ]
+    elif (big,medium) in ( (10,2), (10,4) ):
+        files=[
+            '/store/relval/CMSSW_10_2_4/RelValTTbar_13/MINIAODSIM/PU25ns_102X_upgrade2018_realistic_v12-v1/20000/EB67E894-1B22-0C4F-940B-B1A113F84B92.root',
+            ]
+ 
+ 
     else:
         raise ValueError('no mini AOD file defined for release '+cmsswRelease())
-    eosfiles = [''.join(['root://eoscms//eos/cms', lfn]) for lfn in files]
+    eosfiles = [''.join(['root://cms-xrd-global.cern.ch/', lfn]) for lfn in files]
     return eosfiles
 
 

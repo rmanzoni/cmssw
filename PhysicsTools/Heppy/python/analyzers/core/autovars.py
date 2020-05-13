@@ -6,13 +6,12 @@
 #
 # TODO: more documentation needed here!
 
-from builtins import range
 class NTupleVariable:
     """Branch containing an individual variable (either of the event or of an object), created with a name and a function to compute it
        - name, type, help, default: obvious 
        - function: a function that taken an object computes the value to fill (e.g. lambda event : len(event.goodVertices))
     """
-    def __init__(self, name, function, type=float, help="", default=-99, mcOnly=False, filler=None):
+    def __init__(self, name, function, type=float, help="", default=-99, mcOnly=False, filler=None, nillable=False, zipper=None, precision=None):
         self.name = name
         self.function = function
         self.type = type
@@ -20,15 +19,31 @@ class NTupleVariable:
         self.default = default
         self.mcOnly  = mcOnly
         self.filler  = filler
+        self.nillable = nillable
+        if precision != None:
+            if type != float: raise RuntimeError("Precision can only be specified for float branches")
+            if zipper != None: raise RuntimeError("Can't specify both a precision and a zipper")
+            import ROOT
+            zipper = ROOT.heppy.FloatZipper(precision)
+        self.zipper = zipper
     def __call__(self,object):
         ret = self.function(object)
         return ret
     def makeBranch(self,treeNumpy,isMC):
         if self.mcOnly and not isMC: return
-        treeNumpy.var(self.name, type=self.type, default=self.default, title=self.help, filler=self.filler)
+        treeNumpy.var(self.name, type=self.type, default=self.default, title=self.help, filler=self.filler, zipper=self.zipper)
     def fillBranch(self,treeNumpy,object,isMC):
         if self.mcOnly and not isMC: return
         treeNumpy.fill(self.name, self(object))
+    def setPrecision(self,precision):
+        if self.type != float: raise RuntimeError("Precision can only be specified for float branches")
+        if precision > 0:
+            if self.zipper != None: print "Warning: setting precision on branch %s which already has a non-null zipper" % self.name
+            import ROOT
+            self.zipper = ROOT.heppy.FloatZipper(precision)
+        elif precision == -1:
+            self.zipper = None
+        else: raise RuntimeError("Precision = 0 makes no sense")
     def __repr__(self):
         return "<NTupleVariable[%s]>" % self.name
 
@@ -58,7 +73,7 @@ class NTupleObjectType:
                     for subvar in so.objectType.allVars(isMC):
                         subvars.append(NTupleVariable(so.name+"_"+subvar.name,
                                   #DebugComposer(so,subvar),#lambda object : subvar(so(object)),
-                                  lambda object, subvar=subvar, so=so : subvar(so(object)), 
+                                  lambda object, subvar=subvar, so=so, default=subvar.default, nillable=so.nillable : self.getSubObject(object, subvar, so, default, nillable),
                                   # ^-- lambda object : subvar(so(object)) doesn't work due to scoping, see
                                   #     http://stackoverflow.com/questions/2295290/what-do-lambda-function-closures-capture-in-python/2295372#2295372
                                   type = subvar.type, help = subvar.help, default = subvar.default, mcOnly = subvar.mcOnly,
@@ -117,36 +132,46 @@ class NTupleObjectType:
         self.variables = [ v for v in self.variables if v.name != name]
     def __repr__(self):
         return "<NTupleObjectType[%s]>" % self.name
-
-
+    def getSubObject(self, object, subvar, so, default, nillable):
+        if so(object) != None:
+            return subvar(so(object))
+        elif nillable:
+            return subvar.default
+        else:
+            raise RuntimeError("Object %s_%s does not exist, maybe make it nillable?" % (so.name, subvar.name))
 
 
 class NTupleSubObject:
     """Type to add a sub-object within an NTupleObjectType, given a name (used as prefix), a function to extract the sub-object and NTupleObjectType to define tye type"""
-    def __init__(self,name,function,objectType,mcOnly=False):
+    def __init__(self,name,function,objectType,mcOnly=False, nillable=False):
         self.name = name
         self.function = function
         self.objectType = objectType
         self.mcOnly = mcOnly
+        self.nillable = nillable
     def __call__(self,object):
         return self.function(object)
 
 class NTupleObject:
     """Type defining a set of branches associated to a single object (i.e. an instance of NTupleObjectType)"""
-    def __init__(self, name, objectType, help="", mcOnly=False):
+    def __init__(self, name, objectType, help="", mcOnly=False, nillable=False):
         self.name = name
         self.objectType = objectType
         self.mcOnly = mcOnly
         self.help = ""
+        self.nillable = nillable
     def makeBranches(self,treeNumpy,isMC):
         if not isMC and self.mcOnly: return
         allvars = self.objectType.allVars(isMC)
         for v in allvars:
             h = v.help
             if self.help: h = "%s for %s" % ( h if h else v.name, self.help )
-            treeNumpy.var("%s_%s" % (self.name, v.name), type=v.type, default=v.default, title=h, filler=v.filler)
+            treeNumpy.var("%s_%s" % (self.name, v.name), type=v.type, default=v.default, title=h, filler=v.filler, zipper=v.zipper)
     def fillBranches(self,treeNumpy,object,isMC):
         if self.mcOnly and not isMC: return
+        if object is None:
+            if self.nillable: return
+            raise RuntimeError("Error, object not found or None when filling branch %s" % self.name)
         allvars = self.objectType.allVars(isMC)
         for v in allvars:
             treeNumpy.fill("%s_%s" % (self.name, v.name), v(object))
@@ -175,10 +200,10 @@ class NTupleCollection:
         treeNumpy.var("n"+self.name, int)
         allvars = self.objectType.allVars(isMC)
         for v in allvars:
-            for i in range(1,self.maxlen+1):
+            for i in xrange(1,self.maxlen+1):
                 h = v.help
                 if self.help: h = "%s for %s [%d]" % ( h if h else v.name, self.help, i-1 )
-                treeNumpy.var("%s%d_%s" % (self.name, i, v.name), type=v.type, default=v.default, title=h, filler=v.filler)
+                treeNumpy.var("%s%d_%s" % (self.name, i, v.name), type=v.type, default=v.default, title=h, filler=v.filler, zipper=v.zipper)
     def makeBranchesVector(self,treeNumpy,isMC):
         if not isMC and self.objectType.mcOnly: return
         treeNumpy.var("n"+self.name, int)
@@ -187,7 +212,7 @@ class NTupleCollection:
             h = v.help
             if self.help: h = "%s for %s" % ( h if h else v.name, self.help )
             name="%s_%s" % (self.name, v.name) if v.name != "" else self.name
-            treeNumpy.vector(name, "n"+self.name, self.maxlen, type=v.type, default=v.default, title=h, filler=v.filler)
+            treeNumpy.vector(name, "n"+self.name, self.maxlen, type=v.type, default=v.default, title=h, filler=v.filler, zipper=v.zipper)
     def fillBranchesScalar(self,treeNumpy,collection,isMC):
         if not isMC and self.objectType.mcOnly: return
         if self.filter != None: collection = [ o for o in collection if self.filter(o) ]
@@ -196,7 +221,7 @@ class NTupleCollection:
         num = min(self.maxlen,len(collection))
         treeNumpy.fill("n"+self.name, num)
         allvars = self.objectType.allVars(isMC)
-        for i in range(num): 
+        for i in xrange(num): 
             o = collection[i]
             for v in allvars:
                 treeNumpy.fill("%s%d_%s" % (self.name, i+1, v.name), v(o))
@@ -210,7 +235,7 @@ class NTupleCollection:
         allvars = self.objectType.allVars(isMC)
         for v in allvars:
             name="%s_%s" % (self.name, v.name) if v.name != "" else self.name
-            treeNumpy.vfill(name, [ v(collection[i]) for i in range(num) ])
+            treeNumpy.vfill(name, [ v(collection[i]) for i in xrange(num) ])
     def __repr__(self):
         return "<NTupleCollection[%s]>" % self.name
 

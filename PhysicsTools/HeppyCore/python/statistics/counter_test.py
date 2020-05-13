@@ -1,9 +1,8 @@
-from __future__ import absolute_import
 import unittest
 import os 
 import shutil
 
-from .counter import Counter
+from counter import Counter
 
 class CounterTestCase(unittest.TestCase):
 

@@ -1,8 +1,7 @@
 from __future__ import print_function
-from builtins import range
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
-from PhysicsTools.Heppy.physicsutils.genutils import isNotFromHadronicShower, realGenMothers, realGenDaughters
+from PhysicsTools.Heppy.physicsutils.genutils import isNotFromHadronicShower, realGenMothers, realGenDaughters, motherRef
 
 def interestingPdgId(id,includeLeptons=False):        
     id = abs(id)
@@ -85,12 +84,12 @@ class GeneratorAnalyzer( Analyzer ):
             #        "  ".join("%d[%d]" % (p.daughter(i).pdgId(), p.daughter(i).status()) for i in xrange(p.numberOfDaughters())))
             if id in self.savePreFSRParticleIds:
                 # for light objects, we want them pre-radiation
-                if any((p.mother(j).pdgId() == p.pdgId()) for j in range(p.numberOfMothers())):
+                if any((p.mother(j).pdgId() == p.pdgId()) for j in xrange(p.numberOfMothers())):
                     #print "    fail auto-decay"
                     continue
             else:
                 # everything else, we want it after radiation, i.e. just before decay
-                if any((p.daughter(j).pdgId() == p.pdgId() and p.daughter(j).status() > 2) for j in range(p.numberOfDaughters())):
+                if any((p.daughter(j).pdgId() == p.pdgId() and p.daughter(j).status() > 2) for j in xrange(p.numberOfDaughters())):
                     #print "    fail auto-decay"
                     continue
             # FIXME find a better criterion to discard there
@@ -111,7 +110,7 @@ class GeneratorAnalyzer( Analyzer ):
                 if interestingPdgId(mom.pdgId()) or (getattr(mom,'rawIndex',-1) in keymap):
                     #print "    interesting mom"
                     # exclude extra x from p -> p + x
-                    if not any(mom.daughter(j2).pdgId() == mom.pdgId() for j2 in range(mom.numberOfDaughters())):
+                    if not any(mom.daughter(j2).pdgId() == mom.pdgId() for j2 in xrange(mom.numberOfDaughters())):
                         #print "         pass no-self-decay"
                         ok = True
                     # Account for generator feature with Higgs decaying to itself with same four-vector but no daughters
@@ -137,20 +136,21 @@ class GeneratorAnalyzer( Analyzer ):
         for igp,gp in enumerate(good):
             gp.motherIndex = -1
             gp.sourceId    = 99
+            gp.promptHardFlag = gp.isPromptFinalState() or gp.isDirectPromptTauDecayProductFinalState() or gp.isHardProcess() 
             gp.genSummaryIndex = igp
-            ancestor = None if gp.numberOfMothers() == 0 else gp.motherRef(0)
-            while ancestor != None and ancestor.isNonnull():
-                if ancestor.key() in keymap:
-                    gp.motherIndex = keymap[ancestor.key()]
+            (ancestor, ancestorKey) = (None,-1) if gp.numberOfMothers() == 0 else motherRef(gp)
+            while ancestor:
+                if ancestorKey in keymap:
+                    gp.motherIndex = keymap[ancestorKey]
                     if ancestor.pdgId() != good[gp.motherIndex].pdgId():
                         print("Error keying %d: motherIndex %d, ancestor.pdgId %d, good[gp.motherIndex].pdgId() %d " % (igp, gp.motherIndex, ancestor.pdgId(),  good[gp.motherIndex].pdgId()))
                     break
-                ancestor = None if ancestor.numberOfMothers() == 0 else ancestor.motherRef(0)
+                (ancestor, ancestorKey) = (None,-1) if ancestor.numberOfMothers() == 0 else motherRef(ancestor)
             if abs(gp.pdgId()) not in [1,2,3,4,5,11,12,13,14,15,16,21]:
                 gp.sourceId = gp.pdgId()
             if gp.motherIndex != -1:
                 ancestor = good[gp.motherIndex]
-                if ancestor.sourceId != 99 and (ancestor.mass() > gp.mass() or gp.sourceId == 99):
+                if hasattr(ancestor, "sourceId") and ancestor.sourceId != 99 and (ancestor.mass() > gp.mass() or gp.sourceId == 99):
                     gp.sourceId = ancestor.sourceId
         event.generatorSummary = good
         # add the ID of the mother to be able to recreate last decay chains
@@ -171,7 +171,7 @@ class GeneratorAnalyzer( Analyzer ):
                 print("%3d  {%6d}: %+8d  %3d :  %8.2f   %+5.2f   %+5.2f : %d %2d : %+8d {%3d}: %s" % ( ip,p.rawIndex,
                         p.pdgId(), p.status(), p.pt(), p.eta(), p.phi(), len(moms), p.numberOfDaughters(), 
                         p.motherId, p.motherIndex,
-                        "  ".join("%d[%d]" % (p.daughter(i).pdgId(), p.daughter(i).status()) for i in range(p.numberOfDaughters()))))
+                        "  ".join("%d[%d]" % (p.daughter(i).pdgId(), p.daughter(i).status()) for i in xrange(p.numberOfDaughters()))))
         if verbose:
             print("\n\n")
 

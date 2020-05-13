@@ -1,6 +1,6 @@
-from builtins import range
 from PhysicsTools.Heppy.physicsobjects.PhysicsObject import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
+from PhysicsTools.Heppy.physicsutils.PuJetIDWP import PuJetIDWP
 import math
 
 loose_WP = [
@@ -40,7 +40,35 @@ _btagWPs = {
     "CMVAv2L": ("pfCombinedMVAV2BJetTags", -0.715), # for same b-jet efficiency of CSVv2IVFL on ttbar MC, jet pt > 30
     "CMVAv2M": ("pfCombinedMVAV2BJetTags", 0.185),  # for same b-jet efficiency of CSVv2IVFM on ttbar MC, jet pt > 30
     "CMVAv2T": ("pfCombinedMVAV2BJetTags", 0.875),  # for same b-jet efficiency of CSVv2IVFT on ttbar MC, jet pt > 30
-
+###https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation94X
+    "CSVv2IVF94XL": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.5803),
+    "CSVv2IVF94XM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8838),
+    "CSVv2IVF94XT": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.9693),
+    "DeepCSVL": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.1522),
+    "DeepCSVM": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.4941),
+    "DeepCSVT": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.8001),
+### Full run 2, year-by-year WPs:  
+ # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
+ # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
+ # https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
+    "DeepCSV_2016_L": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.2217),
+    "DeepCSV_2016_M": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.6321),
+    "DeepCSV_2016_T": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.8953),
+    "DeepCSV_2017_L": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.1522),
+    "DeepCSV_2017_M": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.4941),
+    "DeepCSV_2017_T": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.8001),
+    "DeepCSV_2018_L": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.1241),
+    "DeepCSV_2018_M": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.4184),
+    "DeepCSV_2018_T": ("pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb", 0.7527),
+    "DeepFlav_2016_L": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.0614),
+    "DeepFlav_2016_M": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.3093),
+    "DeepFlav_2016_T": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.7221),
+    "DeepFlav_2017_L": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.0521),
+    "DeepFlav_2017_M": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.3033),
+    "DeepFlav_2017_T": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.7489),
+    "DeepFlav_2018_L": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.0494),
+    "DeepFlav_2018_M": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.2770),
+    "DeepFlav_2018_T": ("pfDeepFlavourJetTags:probb + pfDeepFlavourJetTags:probbb + pfDeepFlavourJetTags:problepb", 0.7264),
 }
 
 class Jet(PhysicsObject):   
@@ -97,6 +125,8 @@ class Jet(PhysicsObject):
 
 
     def jetID(self,name=""):
+        if not self.hasPFSpecific():
+            return False
         if not self.isPFJet():
             raise RuntimeError("jetID implemented only for PF Jets")
         eta = abs(self.eta());
@@ -117,13 +147,17 @@ class Jet(PhysicsObject):
             if   self.jetID("PAG_monoID_Loose") and self.jetID("POG_PFID_Tight") : return 4;
             if   self.jetID("POG_PFID_Tight")  : return 3;
             #elif self.jetID("POG_PFID_Medium") : return 2;  commented this line because this working point doesn't exist anymore (as 12/05/15)
-            elif self.jetID("POG_PFID_Loose")  : return 1;
+            # elif self.jetID("POG_PFID_Loose")  : return 1;
             else                               : return 0;
 
         # jetID from here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_13_TeV_data
-        if name == "POG_PFID_Loose":    return ((eta<3.0 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)));
-        if name == "POG_PFID_Medium":   return (npr>1 and phf<0.95 and nhf<0.95 and muf < 0.8) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0));
-        if name == "POG_PFID_Tight":    return ((eta<3.0 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)));
+        if name == "POG_PFID_Loose2016":    return ((eta<2.7 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or ((eta>2.7 and eta<3.0) and (nhf<0.98 and phf>0.01 and npn>2)) or (eta>3.0 and (phf<0.90 and npn>10)))
+        if name == "POG_PFID_Tight2016":    return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or ((eta>2.7 and eta<3.0) and (nhf<0.98 and  phf>0.01 and npn>2)) or (eta>3.0 and (phf<0.90 and npn>10)))
+        if name == "POG_PFID_TightLepVeto2016": return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90 and muf<0.8) and (eta>2.4 or (elf<0.90 and chf>0 and chm>0)))))
+        # 2017 jetID from https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVRun2017#Preliminary_Recommendations_for
+        if name == "POG_PFID_Tight":    return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (chf>0 and chm>0)))) or ((eta>2.7 and eta<3.0) and (phf<0.99 and phf>0.02 and npn>2)) or (eta>3.0 and (phf<0.90 and nhf>0.02 and npn>10)))
+        if name == "POG_PFID_TightLepVeto": return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90 and muf<0.8) and (eta>2.4 or (elf<0.80 and chf>0 and chm>0)))))
+        #
         if name == "VBFHBB_PFID_Loose":  return (npr>1 and phf<0.99 and nhf<0.99);
         if name == "VBFHBB_PFID_Medium": return (npr>1 and phf<0.99 and nhf<0.99) and ((eta<=2.4 and nhf<0.9 and phf<0.9 and elf<0.99 and muf<0.99 and chf>0 and chm>0) or eta>2.4);
         if name == "VBFHBB_PFID_Tight":  return (npr>1 and phf<0.99 and nhf<0.99) and ((eta<=2.4 and nhf<0.9 and phf<0.9 and elf<0.70 and muf<0.70 and chf>0 and chm>0) or eta>2.4);
@@ -141,19 +175,47 @@ class Jet(PhysicsObject):
             return self.userFloat(label)
         return -99
 
-    def puJetId(self, label="pileupJetId:fullDiscriminant"):
+    def puJetId(self, label="pileupJetId:fullDiscriminant", tuning="80X", wp="loose"):
         '''Full mva PU jet id'''
+        if tuning == '80X':
+            # https://twiki.cern.ch/twiki/bin/view/CMS/PileupJetID#Information_for_13_TeV_data_anal
+            # Note: The following only works for miniAOD v2 - return true
+            #       otherwise
 
-        puMva = self.puMva(label)
-        wp = loose_53X_WP
-        eta = abs(self.eta())
+            # Training only performed up to 50 GeV, return pass above per
+            # recommendation from JME algo subgroup
+            if self.pt() > 50.:
+                return True
 
-        for etamin, etamax, cut in wp:
-            if not(eta>=etamin and eta<etamax):
-                continue
-            return puMva>cut
-        return -99
+            # Return true if miniAOD v1 to avoid throwing in JetAnalyzer
+            if not self.hasUserInt('pileupJetId:fullId'):
+                return True
 
+            pu_id_int = self.userInt('pileupJetId:fullId')
+            if wp == 'loose':
+                return bool(pu_id_int & (1 << 2))
+            elif wp == 'medium':
+                return bool(pu_id_int & (1 << 1))
+            elif wp == 'tight':
+                return bool(pu_id_int & (1 << 0))
+            else:
+                raise RuntimeError('Pileup jet ID: Working point {wp} not supported'.format(wp=wp))
+
+        elif tuning=="76X":
+            puId76X = PuJetIDWP()
+            return puId76X.passWP(self,wp)
+        else:
+            puMva = self.puMva(label)
+            wp = loose_53X_WP
+            eta = abs(self.eta())
+
+            for etamin, etamax, cut in wp:
+                if not(eta>=etamin and eta<etamax):
+                    continue
+                return puMva>cut
+        
+            return -99
+                    
     def rawFactor(self):
         return self.jecFactor('Uncorrected') * self._rawFactorMultiplier
 
@@ -181,6 +243,8 @@ class Jet(PhysicsObject):
         return 1.0 # Jet does not have any L1 correction
 
     def btag(self,name):
+        if "+" in name:
+            return sum(self.bDiscriminator(x.strip()) for x in name.split())
         ret = self.bDiscriminator(name)
         if ret == -1000 and name.startswith("pf"):
             ret = self.bDiscriminator(name[2].lower()+name[3:])
@@ -263,8 +327,6 @@ class Jet(PhysicsObject):
             sum_dphi2 += dphi*dphi*weight         
 
 
-
-
         a = 0.
         b = 0.
         c = 0.
@@ -284,8 +346,11 @@ class Jet(PhysicsObject):
 
         if a+b-delta > 0: jet.axis2 = -math.log(math.sqrt(0.5*(a+b-delta)))
         else: jet.axis2 = -1.                                              
-        return jet	
+        if a+b+delta > 0: jet.axis1 = -math.log(math.sqrt(0.5*(a+b+delta)))
+        else: jet.axis1 = -1.
 
+        return jet
+   
 
 
 class GenJet( PhysicsObject):

@@ -1,5 +1,4 @@
 from __future__ import print_function
-from builtins import range
 import ROOT
 import os, types
 from math import *
@@ -85,17 +84,20 @@ class JetReCalibrator:
         """Return the raw 4-vector, after subtracting the muons (if requested),
            or None if the jet fails the EMF cut."""
         p4 = jet.p4() * jet.rawFactor()
+        if not jet.hasPFSpecific():
+            # return raw 4-vector if there are no PF details (e.g. AK8 jet below threshold)
+            return p4
         emf = ( jet.physObj.neutralEmEnergy() + jet.physObj.chargedEmEnergy() )/p4.E()
         if emf > self.type1METParams['skipEMfractionThreshold']:
             return None
         if self.type1METParams['skipMuons']:
-            for idau in range(jet.numberOfDaughters()):
+            for idau in xrange(jet.numberOfDaughters()):
                 pfcand = jet.daughter(idau)
                 if pfcand.isGlobalMuon() or pfcand.isStandAloneMuon(): 
                     p4 -= pfcand.p4()
         return p4
 
-    def correct(self,jet,rho,delta=0,addCorr=False,addShifts=False, metShift=[0,0],type1METCorr=[0,0,0]):
+    def correct(self,jet,rho,delta=0,addCorr=False,addShifts=False, metShift=None, type1METCorr=None):
         """Corrects a jet energy (optionally shifting it also by delta times the JEC uncertainty)
 
            If addCorr, set jet.corr to the correction.
@@ -110,6 +112,10 @@ class JetReCalibrator:
            The type1METCorr vector, will accumulate the x, y, sumEt type1 MET corrections, to be
            applied to the *RAW MET* (if the feature was turned on in the constructor of the class).
         """
+        if not metShift:
+            metShift = [0,0]
+        if not type1METCorr:
+            type1METCorr = [0,0,0]
         raw = jet.rawFactor()
         corr = self.getCorrection(jet,rho,delta)
         if addCorr: 
@@ -140,8 +146,12 @@ class JetReCalibrator:
         jet.setCorrP4(jet.p4() * (corr * raw))
         return True
 
-    def correctAll(self,jets,rho,delta=0, addCorr=False, addShifts=False, metShift=[0.,0.], type1METCorr=[0.,0.,0.]):
+    def correctAll(self,jets,rho,delta=0, addCorr=False, addShifts=False, metShift=None, type1METCorr=None):
         """Applies 'correct' to all the jets, discard the ones that have bad corrections (corrected pt <= 0)"""
+        if not metShift:
+            metShift = [0,0]
+        if not type1METCorr:
+            type1METCorr = [0,0,0]
         badJets = []
         if metShift     != [0.,0.   ]: raise RuntimeError("input metShift tuple is not initialized to zeros")
         if type1METCorr != [0.,0.,0.]: raise RuntimeError("input type1METCorr tuple is not initialized to zeros")

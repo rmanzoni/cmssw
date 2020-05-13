@@ -3,14 +3,13 @@
 # https://github.com/cbernet/heppy/blob/master/LICENSE
 
 from __future__ import print_function
-from builtins import range
 import os
 import shutil
 import glob
 import sys
 import imp
 import copy
-from multiprocessing import Pool
+import multiprocessing 
 from pprint import pprint
 
 # import root in batch mode if "-i" is not among the options
@@ -18,6 +17,7 @@ if "-i" not in sys.argv:
     oldv = sys.argv[:]
     sys.argv = [ "-b-"]
     import ROOT
+    ROOT.PyConfig.IgnoreCommandLineOptions = True
     ROOT.gROOT.SetBatch(True)
     sys.argv = oldv
 
@@ -43,16 +43,19 @@ def runLoopAsync(comp, outDir, configName, options):
         print(traceback.format_exc())
         raise
 
+_globalGracefulStopFlag = multiprocessing.Value('i',0)
 def runLoop( comp, outDir, config, options):
     fullName = '/'.join( [outDir, comp.name ] )
-    # import pdb; pdb.set_trace()
     config.components = [comp]
+    memcheck = 2 if getattr(options,'memCheck',False) else -1
     loop = Looper( fullName,
                    config,
                    options.nevents, 0,
                    nPrint = options.nprint,
                    timeReport = options.timeReport,
-                   quiet = options.quiet)
+                   quiet = options.quiet,
+                   memCheckFromEvent = memcheck,
+                   stopFlag = _globalGracefulStopFlag)
     # print loop
     if options.iEvent is None:
         loop.loop()
@@ -100,7 +103,7 @@ def split(comps):
     splitComps = []
     for comp in comps:
         if hasattr( comp, 'fineSplitFactor') and comp.fineSplitFactor>1:
-            subchunks = list(range(comp.fineSplitFactor))
+            subchunks = range(comp.fineSplitFactor)
             for ichunk, chunk in enumerate([(f,i) for f in comp.files for i in subchunks]):
                 newComp = copy.deepcopy(comp)
                 newComp.files = [chunk[0]]
@@ -180,7 +183,7 @@ def main( options, args, parser ):
         sys.exit(0)
     if len(selComps)>1:
         shutil.copy( cfgFileName, outDir )
-        pool = Pool(processes=min(len(selComps),options.ntasks))
+        pool = multiprocessing.Pool(processes=min(len(selComps),options.ntasks,multiprocessing.cpu_count()))
         ## workaround for a scoping problem in ipython+multiprocessing
         import PhysicsTools.HeppyCore.framework.heppy_loop as ML 
         for comp in selComps:
@@ -189,6 +192,9 @@ def main( options, args, parser ):
                               callback=ML.callBack)
         pool.close()
         pool.join()
+    elif len(selComps)==0:
+        print("ERROR: no components selected")
+        sys.exit(1)
     else:
         # when running only one loop, do not use multiprocessor module.
         # then, the exceptions are visible -> use only one sample for testing

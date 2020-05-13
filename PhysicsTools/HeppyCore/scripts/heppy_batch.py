@@ -1,7 +1,6 @@
 #!/bin/env python
 
 from __future__ import print_function
-from builtins import range
 import sys
 import imp
 import copy
@@ -75,26 +74,62 @@ exit $?
 """
     return script
 
-def batchScriptCERN( jobDir, remoteDir=''):
-    '''prepare the LSF version of the batch script, to run on LSF'''
-
-    dirCopy = """echo 'sending the logs back'  # will send also root files if copy failed
-rm Loop/cmsswPreProcessing.root
-cp -r Loop/* $LS_SUBCWD
+def batchScriptCERN( runningMode, jobDir, remoteDir=''):
+   if runningMode == "LXPLUS-CONDOR-TRANSFER": 
+       init  = """
+[ -f cmgdataset.tar.gz ] && tar xzf cmgdataset.tar.gz
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+export SCRAM_ARCH={scram_arch}
+scram project -n cmssw CMSSW {cmssw_version}
+cd cmssw
+tar xzf ../src.tar.gz
+cd src
+eval $(scram runtime -sh)
+cd $_CONDOR_JOB_IWD
+mkdir -p cache
+export TMPDIR=$PWD/cache
+mkdir -p chunk
+cd chunk
+tar xzf ../chunk.tar.gz
+export HOSTNAME
+export HOME=$_CONDOR_JOB_IWD
+export USER=""
+""".format(scram_arch = os.environ['SCRAM_ARCH'], cmssw_version = os.environ['CMSSW_VERSION'])
+       dirCopy = """
+cd Loop
+tar -czf out.tar.gz *
+mv out.tar.gz $_CONDOR_JOB_IWD
+"""
+   else: # shared filesystem
+       init = """
+pushd $CMSSW_BASE/src
+eval $(scram runtime -sh)
+popd
+echo
+mkdir cache
+export TMPDIR=$PWD/cache
+mkdir job
+cd job
+echo '==== copying job dir to worker ===='
+echo
+cp -rvf $LS_SUBCWD/* .
+"""
+       dirCopy = """
+cp -rv Loop/* $LS_SUBCWD
 if [ $? -ne 0 ]; then
    echo 'ERROR: problem copying job directory back'
 else
    echo 'job directory copy succeeded'
 fi"""
 
-    if remoteDir=='':
-        cpCmd=dirCopy
-    elif  remoteDir.startswith("root://eoscms.cern.ch//eos/cms/store/"):
-        cpCmd="""echo 'sending root files to remote dir'
+   if remoteDir=='':
+      cpCmd=dirCopy
+   elif  remoteDir.startswith("root://eoscms.cern.ch//eos/cms/store/"):
+       cpCmd="""echo '==== sending root files to remote dir ===='
+echo
 export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH # 
 for f in Loop/*/tree*.root
 do
-   rm Loop/cmsswPreProcessing.root
    ff=`echo $f | cut -d/ -f2`
    ff="${{ff}}_`basename $f | cut -d . -f 1`"
    echo $f
@@ -103,16 +138,16 @@ do
    source $VO_CMS_SW_DIR/cmsset_default.sh
    for try in `seq 1 3`; do
       echo "Stageout try $try"
-      echo "/afs/cern.ch/project/eos/installation/pro/bin/eos.select mkdir {srm}"
-      /afs/cern.ch/project/eos/installation/pro/bin/eos.select mkdir {srm}
-      echo "/afs/cern.ch/project/eos/installation/pro/bin/eos.select cp `pwd`/$f {srm}/${{ff}}_{idx}.root"
-      /afs/cern.ch/project/eos/installation/pro/bin/eos.select cp `pwd`/$f {srm}/${{ff}}_{idx}.root
+      echo "eos mkdir {srm}"
+      eos mkdir {srm}
+      echo "eos cp `pwd`/$f {srm}/${{ff}}_{idx}.root"
+      eos cp `pwd`/$f {srm}/${{ff}}_{idx}.root
       if [ $? -ne 0 ]; then
          echo "ERROR: remote copy failed for file $ff"
          continue
       fi
       echo "remote copy succeeded"
-      remsize=$(/afs/cern.ch/project/eos/installation/pro/bin/eos.select find --size {srm}/${{ff}}_{idx}.root | cut -d= -f3) 
+      remsize=$(eos find --size {srm}/${{ff}}_{idx}.root | cut -d= -f3) 
       locsize=$(cat `pwd`/$f | wc -c)
       ok=$(($remsize==$locsize))
       if [ $ok -ne 1 ]; then
@@ -126,43 +161,39 @@ do
       break
    done
 done
-cp -r Loop/* $LS_SUBCWD
-if [ $? -ne 0 ]; then
-   echo 'ERROR: problem copying job directory back'
-else
-   echo 'job directory copy succeeded'
-fi
+echo
+echo '==== sending local files back ===='
+echo
+{dirCopy}
 """.format(
-           idx = jobDir[jobDir.find("_Chunk")+6:].strip("/") if '_Chunk' in jobDir else 'all',
-           srm = (""+remoteDir+jobDir[ jobDir.rfind("/") : (jobDir.find("_Chunk") if '_Chunk' in jobDir else len(jobDir)) ]).replace("root://eoscms.cern.ch/","")
-           )
-    else:
-        print("chosen location not supported yet: ", remoteDir)
-        print('path must start with /store/')
-        sys.exit(1)
+          idx = jobDir[jobDir.find("_Chunk")+6:].strip("/") if '_Chunk' in jobDir else 'all',
+          srm = (""+remoteDir+jobDir[ jobDir.rfind("/") : (jobDir.find("_Chunk") if '_Chunk' in jobDir else len(jobDir)) ]).replace("root://eoscms.cern.ch/",""),
+          dirCopy = dirCopy
+          )
+   else:
+       print("chosen location not supported yet: "+ remoteDir)
+       print('path must start with /store/')
+       sys.exit(1)
 
-    script = """#!/bin/bash
-#BSUB -q 8nm
-echo 'environment:'
+   script = """#!/bin/bash
+echo '==== environment (before) ===='
 echo
 env | sort
-# ulimit -v 3000000 # NO
-echo 'copying job dir to worker'
-cd $CMSSW_BASE/src
-eval `scramv1 ru -sh`
-# cd $LS_SUBCWD
-# eval `scramv1 ru -sh`
-cd -
-cp -rf $LS_SUBCWD .
-ls
-cd `find . -type d | grep /`
-echo 'running'
+echo
+{init}
+echo '==== environment (after) ===='
+echo
+env | sort
+echo
+echo '==== running ===='
 python $CMSSW_BASE/src/PhysicsTools/HeppyCore/python/framework/looper.py pycfg.py config.pck --options=options.json
 echo
+echo '==== sending the files back ===='
+echo
+rm Loop/cmsswPreProcessing.root 2> /dev/null
 {copy}
-""".format(copy=cpCmd)
-
-    return script
+""".format(copy=cpCmd, init=init)
+   return script
 
 
 def batchScriptPSI( index, jobDir, remoteDir=''):
@@ -298,38 +329,40 @@ class MyBatchManager( BatchManager ):
     '''Batch manager specific to cmsRun processes.''' 
 
     def PrepareJobUser(self, jobDir, value ):
-        '''Prepare one job. This function is called by the base class.'''
-        print(value)
-        print(components[value])
+       '''Prepare one job. This function is called by the base class.'''
+       print(value)
+       print(components[value])
 
-        #prepare the batch script
-        scriptFileName = jobDir+'/batchScript.sh'
-        scriptFile = open(scriptFileName,'w')
-        storeDir = self.remoteOutputDir_.replace('/castor/cern.ch/cms','')
-        mode = self.RunningMode(options.batch)
-        if mode == 'LXPLUS':
-            scriptFile.write( batchScriptCERN( jobDir, storeDir ) ) 
-        elif mode == 'PSI':
-            scriptFile.write( batchScriptPSI ( value, jobDir, storeDir ) ) # storeDir not implemented at the moment
-        elif mode == 'LOCAL':
-            scriptFile.write( batchScriptLocal( storeDir, value) )  # watch out arguments are swapped (although not used)
-        elif mode == 'PISA' :
-            scriptFile.write( batchScriptPISA( storeDir, value) ) 	
-        elif mode == 'PADOVA' :
-            scriptFile.write( batchScriptPADOVA( value, jobDir) )        
-        elif mode == 'IC':
-            scriptFile.write( batchScriptIC(jobDir) )
-        scriptFile.close()
-        os.system('chmod +x %s' % scriptFileName)
-
-        shutil.copyfile(cfgFileName, jobDir+'/pycfg.py')
+       #prepare the batch script
+       scriptFileName = jobDir+'/batchScript.sh'
+       scriptFile = open(scriptFileName,'w')
+       storeDir = self.remoteOutputDir_.replace('/castor/cern.ch/cms','')
+       mode = self.RunningMode(options.batch)
+       self.mode = mode
+       if mode in ('LXPLUS-LSF', 'LXPLUS-CONDOR-SIMPLE', 'LXPLUS-CONDOR-TRANSFER'):
+           scriptFile.write( batchScriptCERN( mode, jobDir, storeDir ) )
+       elif mode == 'PSI':
+           scriptFile.write( batchScriptPSI ( value, jobDir, storeDir ) ) # storeDir not implemented at the moment
+       elif mode == 'LOCAL':
+           scriptFile.write( batchScriptLocal( storeDir, value) )  # watch out arguments are swapped (although not used)
+       elif mode == 'PISA' :
+           scriptFile.write( batchScriptPISA( storeDir, value) )
+       elif mode == 'PADOVA' :
+           scriptFile.write( batchScriptPADOVA( value, jobDir) )        
+       elif mode == 'IC':
+           scriptFile.write( batchScriptIC(jobDir) )
+       else: raise RuntimeError("Unsupported mode %s" % mode)
+       scriptFile.close()
+       os.system('chmod +x %s' % scriptFileName)
+       
+       shutil.copyfile(cfgFileName, jobDir+'/pycfg.py')
 #      jobConfig = copy.deepcopy(config)
 #      jobConfig.components = [ components[value] ]
-        cfgFile = open(jobDir+'/config.pck','w')
-        pickle.dump(  components[value] , cfgFile )
-        # pickle.dump( cfo, cfgFile )
-        cfgFile.close()
-        if hasattr(self,"heppyOptions_"):
+       cfgFile = open(jobDir+'/config.pck','w')
+       pickle.dump(  components[value] , cfgFile )
+       # pickle.dump( cfo, cfgFile )
+       cfgFile.close()
+       if hasattr(self,"heppyOptions_"):
             optjsonfile = open(jobDir+'/options.json','w')
             optjsonfile.write(json.dumps(self.heppyOptions_))
             optjsonfile.close()
@@ -363,7 +396,7 @@ if __name__ == '__main__':
     handle.close()
 
     components = split( [comp for comp in config.components if len(comp.files)>0] )
-    listOfValues = list(range(0, len(components)))
+    listOfValues = range(0, len(components))
     listOfNames = [comp.name for comp in components]
 
     batchManager.PrepareJobs( listOfValues, listOfNames )

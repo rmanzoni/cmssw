@@ -1,6 +1,6 @@
-from builtins import range
 from PhysicsTools.Heppy.physicsobjects.PhysicsObjects import printOut 
 from PhysicsTools.Heppy.physicsobjects.PhysicsObjects import GenParticle 
+import ROOT
 
 def findStatus1Leptons(particle):
     '''Returns status 1 e and mu among the particle daughters'''
@@ -64,7 +64,7 @@ def isPromptLepton(lepton, beforeFSR, includeMotherless=True, includeTauDecays=F
 
 
 def isNotFromHadronicShower(l):
-    for x in range(l.numberOfMothers()):
+    for x in xrange(l.numberOfMothers()):
         mom = l.mother(x)
         if mom.status() > 2: return True
         id = abs(mom.pdgId())
@@ -78,21 +78,25 @@ def isNotFromHadronicShower(l):
         if id >= 22 and id <= 39: return True
     return True
 
-def realGenDaughters(gp,excludeRadiation=True):
+def realGenDaughters(gp,dauChecked=[],excludeRadiation=True):
     """Get the daughters of a particle, going through radiative X -> X' + a
        decays, either including or excluding the radiation among the daughters
        e.g. for  
                   X -> X' + a, X' -> b c 
            realGenDaughters(X, excludeRadiation=True)  = { b, c }
-           realGenDaughters(X, excludeRadiation=False) = { a, b, c }"""
+           realGenDaughters(X, excludeRadiation=False) = { a, b, c }
+       Keep track of the daughters we've already checked so that we don't get
+       stuck in an infinite loop"""
     ret = []
-    for i in range(gp.numberOfDaughters()):
+    for i in xrange(gp.numberOfDaughters()):
         dau = gp.daughter(i)
+        if dau in dauChecked: continue
+        dauChecked.append(dau)
         if dau.pdgId() == gp.pdgId():
             if excludeRadiation:
-                return realGenDaughters(dau)
+                return realGenDaughters(dau, dauChecked)
             else:
-                ret += realGenDaughters(dau)
+                ret += realGenDaughters(dau, dauChecked)
         else:
             ret.append(dau)
     return ret
@@ -101,7 +105,7 @@ def realGenMothers(gp):
     """Get the mothers of a particle X going through intermediate X -> X' chains.
        e.g. if Y -> X, X -> X' realGenMothers(X') = Y"""
     ret = []
-    for i in range(gp.numberOfMothers()):
+    for i in xrange(gp.numberOfMothers()):
         mom = gp.mother(i)
         if mom.pdgId() == gp.pdgId():
             ret += realGenMothers(mom)
@@ -109,9 +113,14 @@ def realGenMothers(gp):
             ret.append(mom)
     return ret
 
+def motherRef(gp,i=0):
+    return (gp.mother(), ROOT.heppy.GenParticleRefHelper.motherKey(gp,i))
+def daughterRef(gp,i=0):
+    return (gp.daughter(), ROOT.heppy.GenParticleRefHelper.daughterKey(gp,i))
+
 def lastGenCopy(gp):
     me = gp.pdgId();
-    for i in range(gp.numberOfDaughters()):
+    for i in xrange(gp.numberOfDaughters()):
         if gp.daughter(i).pdgId() == me:
             return False
     return True
