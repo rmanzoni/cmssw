@@ -92,7 +92,12 @@ class CmsswPreprocessor :
             else:
                 print("WARNING: cmsswPreprocessor received options but can't pass on to cmsswConfig")
 
-        cmsswConfig.process.source.fileNames = inputfiles
+        # cmsswConfig.process.source.fileNames = inputfiles
+        # convert from unicode to bare string, else it crashes as it expects strings (this happened in 10_6_12)
+        # "/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/cmssw/CMSSW_10_6_12/python/FWCore/ParameterSet/Mixins.py", line 575, in extend
+        #     raise TypeError("wrong type being extended to container "+self._labelIfAny())
+        # TypeError: wrong type being extended to container vstring        
+        cmsswConfig.process.source.fileNames = cmsswConfig.cms.untracked.vstring(map(str,inputfiles))
         # cmsRun will not create the output file if maxEvents==0, leading to crash of the analysis downstream.
         # Thus, we set nEvents = 1 if the input file is empty (the output file will be empty as well).
         cmsswConfig.process.maxEvents.input = 1 if (fineSplitFactor>1 and nEvents==0) else nEvents
