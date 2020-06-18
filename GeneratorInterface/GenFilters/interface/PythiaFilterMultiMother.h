@@ -14,6 +14,9 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 //
 // class decleration
 //
@@ -28,8 +31,11 @@ class PythiaFilterMultiMother : public edm::EDFilter {
 
 
       bool filter(edm::Event&, const edm::EventSetup&) override;
+
    private:
      // ----------member data ---------------------------
+
+       bool isAncestor(HepMC::GenParticle * particle, int IDtoMatch);
 
        edm::EDGetTokenT<edm::HepMCProduct> token_;
        int particleID;
@@ -48,6 +54,12 @@ class PythiaFilterMultiMother : public edm::EDFilter {
 
        int status;
        std::vector<int> motherIDs;
+       std::vector<int> daughterIDs;
+       std::vector<double> daughterMinPts;
+       std::vector<double> daughterMaxPts;
+       std::vector<double> daughterMinEtas;
+       std::vector<double> daughterMaxEtas;
+
        int processID;
 
        double betaBoost;
